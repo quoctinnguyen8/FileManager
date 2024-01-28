@@ -9,6 +9,9 @@ namespace FileManager.UCFileManager
 {
     public partial class FileManager : System.Web.UI.UserControl
     {
+        // TODO: Cho phép nhiều component trong 1 trang, phân biệt nhau bằng tên
+        public string Name { get; set; }
+        public string AjaxPath { get; set; } 
         protected void Page_Load(object sender, EventArgs e)
         {
 

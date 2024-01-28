@@ -1,5 +1,5 @@
 document.addEventListener('alpine:init', () => {
-	Alpine.data('filemanager', (fileManagerAjaxUrl) => ({
+	Alpine.data('filemanager', (name, fileManagerAjaxUrl) => ({
 		_url: {
 			executeCmd: fileManagerAjaxUrl + '/ExecuteCommand',
 			upload: fileManagerAjaxUrl + '/Upload'
@@ -44,6 +44,14 @@ document.addEventListener('alpine:init', () => {
 		init() {
 			this._dirs = [];
 			this.reloadPanel();
+			this.addCustomEvent();
+			this.$watch('_fileSelectedIndex', (newVal, oldVal) => {
+				if (newVal >= 0) {
+					window[`filemanager.${name}.selectedValue`] = this._filesAndFolders[newVal].fullPath.replace(/\\/g, '/');
+				} else {
+					window[`filemanager.${name}.selectedValue`] = '';
+				}
+			});
 		},
 
 		getDirsIn(dirObj, idx) {
@@ -222,6 +230,9 @@ document.addEventListener('alpine:init', () => {
 				lbl.innerText = "Nhấn để chọn file";
 				lbl.setAttribute("title", "");
 			}
+		},
+		addCustomEvent() {
+			// TODO
 		}
 	}));
 });

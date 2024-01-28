@@ -13,11 +13,12 @@
 
     <body>
         <form id="form1" runat="server">
-            <uc1:FileManager runat="server" id="FileManager" />
+
+            <uc1:FileManager runat="server" id="FileManager" Name="NameOfFileManager" AjaxPath="/FileManagerHandler.asmx" />
 
             <div style="margin: 50px">
                 <h2>[Test] Nhận giá trị được chọn từ filemanager</h2>
-                <button id="btnGetResult">Nhấn để nhận</button>
+                <button id="btnGetResult" type="button">Nhấn để nhận</button>
                 <p id="result"></p>
             </div>
         </form>
@@ -25,6 +26,14 @@
         <script src="assets/libs/jquery/jquery-3.6.0.min.js"></script>
         <script defer src="assets/libs/alpinejs/alpinejs-3.13.5.min.js"></script>
         <script src="assets/libs/filemanager/filemanager.js"></script>
+        <script>
+            var btn = document.querySelector("#btnGetResult");
+            var pEle = document.querySelector("#result");
+
+            btn.onclick = function () {
+                pEle.innerText = window['filemanager.NameOfFileManager.selectedValue'];
+            }
+        </script>
     </body>
 
     </html>

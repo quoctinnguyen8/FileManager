@@ -85,7 +85,11 @@
     <Content Include="assets\libs\filemanager\icon\hdd-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\trash-alt-solid.svg" />
     <Content Include="assets\libs\jquery\jquery-3.6.0.min.js" />
-    <Content Include="upload\Bài Tập C Update-v4-1.pdf" />
+    <Content Include="upload\dir1\sub dir 1\.gitkeep" />
+    <Content Include="upload\dir1\sub dir 1 - Copy\.gitkeep" />
+    <Content Include="upload\dir1\sub dir 1 - Copy\sub dir 12\.gitkeep" />
+    <Content Include="upload\dir1\sub dir 12\.gitkeep" />
+    <Content Include="upload\dir2\.gitkeep" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -97,15 +101,7 @@
     <Content Include="FileManagerHandler.asmx" />
     <Content Include="Global.asax" />
     <Content Include="Index.aspx" />
-    <Content Include="upload\dir1\sub dir 1\libs\alpinejs\alpinejs-3.13.5.min.js" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\filemanager.css" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\filemanager.js" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\icon\file-solid.svg" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\icon\file-upload-solid.svg" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\icon\folder-open-solid.svg" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\icon\folder-solid.svg" />
-    <Content Include="upload\dir1\sub dir 1\libs\filemanager\icon\trash-alt-solid.svg" />
-    <Content Include="upload\dir1\sub dir 1\libs\jquery\jquery-3.6.0.min.js" />
+    <None Include="upload\.tmb\.gitkeep" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -135,10 +131,6 @@
   <ItemGroup>
     <Folder Include="App_Code\" />
     <Folder Include="Models\" />
-    <Folder Include="upload\.tmb\" />
-    <Folder Include="upload\dir1\sub dir 1 - Copy\sub dir 12\" />
-    <Folder Include="upload\dir1\sub dir 12\" />
-    <Folder Include="upload\dir2\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

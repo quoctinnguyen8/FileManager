@@ -1,7 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="FileManager.ascx.cs" Inherits="FileManager.UCFileManager.FileManager" %>
 
 
-<div x-data="filemanager('/FileManagerHandler.asmx')" class="filemanager__container">
+<div x-data="filemanager('<%=Name %>','<%=AjaxPath %>')" class="filemanager__container">
     <div class="filemanager__dir-tree">
         <div class="dir-item" x-on:click="getDirsIn(null, -1)">
         <img src="assets/libs/filemanager/icon/hdd-solid.svg" class="dir-icon" />
