@@ -62,6 +62,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="UCFileManager\FileManager.ascx" />
     <Content Include="assets\css\style.css" />
     <None Include="packages.config" />
     <Content Include="assets\js\script.js" />
@@ -79,6 +80,7 @@
     <Content Include="assets\libs\filemanager\icon\file-upload-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\file-word-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\folder-open-solid.svg" />
+    <Content Include="assets\libs\filemanager\icon\folder-plus-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\folder-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\hdd-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\trash-alt-solid.svg" />
@@ -107,6 +109,13 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UCFileManager\FileManager.ascx.cs">
+      <DependentUpon>FileManager.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UCFileManager\FileManager.ascx.designer.cs">
+      <DependentUpon>FileManager.ascx</DependentUpon>
+    </Compile>
     <Compile Include="FileManagerHandler.asmx.cs">
       <DependentUpon>FileManagerHandler.asmx</DependentUpon>
       <SubType>Component</SubType>

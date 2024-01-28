@@ -22,6 +22,7 @@ namespace FileManager
 		// Thư mục upload file
 		private const string ROOT_DIR = "upload";
 		// Thư mục chứa ảnh xem trước
+		// TODO: dùng cho chức năng tạo thumbnail
 		private const string THUMB_DIR = ".tmb";
 		// Ảnh mặc định của thư mục
 		private const string DEFAULT_DIR_ICON = "/assets/libs/filemanager/icon/folder-solid.svg";
@@ -38,6 +39,7 @@ namespace FileManager
 
 		private const int MAX_FILE_SIZE_KB = 5000;  // Kích thước file upload tối đa, tính bằng KB
 		private const string ERR_DIR_NOT_FOUND = "Không tìm thấy thư mục.";
+		private const string ERR_DIR_EXISTS = "Thư mục đã tồn tại.";
 		private const string ERR_FILE_NOT_FOUND = "Không tìm thấy tệp.";
 		private const string ERR_BAD_REUQEST = "Dữ liệu không hợp lệ.";
 		private const string ERR_INTERNAL_SERVER = "Đã xảy ra lỗi trong quá trình xử lý yêu cầu (500). ";
@@ -163,8 +165,9 @@ namespace FileManager
 		{
 			switch (command)
 			{
-				case "del":
+				case "create_folder":
 					{
+						CreateFolder(value);
 						break;
 					}
 				case "select_dir":
@@ -203,6 +206,19 @@ namespace FileManager
 
 			// TODO: xóa thư mục
 			return false;
+		}
+
+		private void CreateFolder(string path)
+		{
+			path = StandardizeDir(path);
+			var fullPath = Path.Combine(RootPath, path);
+			if (Directory.Exists(fullPath))
+			{
+				ResponseErrorJson(HttpStatusCode.BadRequest, ERR_DIR_EXISTS);
+				return;
+			}
+			Directory.CreateDirectory(fullPath);
+			ResponseSuccessJson(null);
 		}
 
 		/// <summary>
@@ -245,11 +261,12 @@ namespace FileManager
 			Context.Response.ContentType = "application/json";
 			Context.Response.StatusCode = (int)statusCode;
 			Context.Response.Write(JsonConvert.SerializeObject(objResponse));
+			Context.Response.Flush();
+			Context.Response.End();
 		}
 
 		private void CreateThumbForFiles(List<FileAndFolderModel> files)
 		{
-
 			for (int i = 0; i < files.Count; i++)
 			{
 				var fileExt = Path.GetExtension(files[i].Path).ToLower();

@@ -1,5 +1,6 @@
 :root {
 	--dir-level-step: 7px;
+	--left-col-width: 250px;
 }
 
 .filemanager__container * {
@@ -15,12 +16,13 @@
 	border: 1px solid gray;
 	box-shadow: 0 0 10px #80808058;
 	display: flex;
+	height: 500px;
+	overflow: hidden;
 }
 
 	.filemanager__container > .filemanager__dir-tree {
-		height: 500px;
-		max-height: 80vh;
-		width: 300px;
+		width: var(--left-col-width);
+		height: 100%;
 		overflow: auto;
 		border-right: 1px solid gray;
 	}
@@ -83,15 +85,17 @@
 	padding-left: calc(var(--dir-level-step) * 10) !important;
 }
 
-.filemanager__panel{
-	width: 100%;
+.filemanager__panel {
+	width: calc(100% - var(--left-col-width));
 	height: 100%;
 }
+
 .filemanager__panel-container {
 	display: flex;
 	flex-wrap: wrap;
 	padding: 10px;
-	height: calc(100% - 20px);
+	height: calc(100% - 62px);
+	overflow: auto;
 }
 
 	.filemanager__panel-container > .panel-item {
@@ -139,16 +143,95 @@
 
 .filemanager__panel .panel-toolbox {
 	padding: 5px 10px;
+	background-color: rgb(213, 227, 252, 0.2);
+	display: flex;
 }
+
 .filemanager__panel > .panel-bottom {
 	padding: 3px 10px;
 	background-color: #f3fbfb;
 	font-size: small;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }
+
 .fbutton {
 	padding: 5px;
 	background-color: transparent;
 	border: 1px solid #3c4c84;
 	border-radius: 4px;
 	cursor: pointer;
+	min-width: 25px;
 }
+
+	.fbutton.red {
+		color: white;
+		background-color: #f03939;
+		border: 1px solid #e02727;
+	}
+
+.empty-folder {
+	font-size: 20pt;
+	margin: 20px auto;
+	text-align: center;
+	color: cadetblue;
+}
+
+.panel-toolbox .panel-toolbox__new-folder {
+	display: flex;
+}
+
+.panel-toolbox .panel-toolbox__upload-file {
+	position: relative;
+}
+
+	.panel-toolbox .panel-toolbox__upload-file input[type=file] {
+		opacity: 0;
+		width: 200px;
+		cursor: pointer;
+	}
+
+	.panel-toolbox .panel-toolbox__upload-file label {
+		position: absolute;
+		padding: 5px 10px;
+		font-size: small;
+		background-color: transparent;
+		border: 1px solid #3c4c84;
+		border-radius: 4px;
+		cursor: pointer;
+		width: 200px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		top: 0;
+		left: 0;
+		user-select: none;
+	}
+
+.ml-1 {
+	margin-left: 5px;
+}
+
+.ml-2 {
+	margin-left: 10px;
+}
+
+.ml-3 {
+	margin-left: 15px;
+}
+
+.d-flex {
+	display: flex;
+}
+
+.finput-text {
+	padding: 5px 10px;
+	border: 1px solid #3c4c84;
+	border-radius: 4px;
+	outline: none;
+}
+
+	.finput-text:focus {
+		box-shadow: 0 0 0 1px rgba(100, 148, 237, 0.5);
+	}
