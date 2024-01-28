@@ -14,11 +14,5 @@ namespace FileManager
         {
 
         }
-
-        [WebMethod]
-        public static object TestAjax()
-        {
-            return "AAAAAAAAAA";
-        }
     }
 }

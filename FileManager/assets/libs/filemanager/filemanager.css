@@ -1,0 +1,154 @@
+:root {
+	--dir-level-step: 7px;
+}
+
+.filemanager__container * {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	color: #393939;
+}
+
+.filemanager__container {
+	border-radius: 5px;
+	border: 1px solid gray;
+	box-shadow: 0 0 10px #80808058;
+	display: flex;
+}
+
+	.filemanager__container > .filemanager__dir-tree {
+		height: 500px;
+		max-height: 80vh;
+		width: 300px;
+		overflow: auto;
+		border-right: 1px solid gray;
+	}
+
+.filemanager__dir-tree > .dir-item {
+	padding: 5px;
+	border-bottom: 1px solid #eeeeee;
+	cursor: pointer;
+	user-select: none;
+}
+
+.filemanager__dir-tree .dir-icon {
+	width: 18pt;
+	padding-right: 5pt;
+}
+
+.filemanager__dir-tree > .dir-item:hover,
+.filemanager__dir-tree > .dir-item.selected {
+	background: #f5f5f5;
+}
+
+/*Cấu hình lùi dòng, tối đa 10 cấp*/
+.filemanager__dir-tree > .dir-item.dir-item-level-1 {
+	padding-left: calc(var(--dir-level-step) * 1) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-2 {
+	padding-left: calc(var(--dir-level-step) * 2) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-3 {
+	padding-left: calc(var(--dir-level-step) * 3) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-4 {
+	padding-left: calc(var(--dir-level-step) * 4) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-5 {
+	padding-left: calc(var(--dir-level-step) * 5) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-6 {
+	padding-left: calc(var(--dir-level-step) * 6) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-7 {
+	padding-left: calc(var(--dir-level-step) * 7) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-8 {
+	padding-left: calc(var(--dir-level-step) * 8) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-9 {
+	padding-left: calc(var(--dir-level-step) * 9) !important;
+}
+
+.filemanager__dir-tree > .dir-item.dir-item-level-10 {
+	padding-left: calc(var(--dir-level-step) * 10) !important;
+}
+
+.filemanager__panel{
+	width: 100%;
+	height: 100%;
+}
+.filemanager__panel-container {
+	display: flex;
+	flex-wrap: wrap;
+	padding: 10px;
+	height: calc(100% - 20px);
+}
+
+	.filemanager__panel-container > .panel-item {
+		height: 150px;
+		width: 100px;
+		margin: 4px;
+		padding: 4px;
+		border: 1px solid transparent;
+		border-radius: 3px;
+		background-color: transparent;
+		cursor: pointer;
+		user-select: none;
+	}
+
+		.filemanager__panel-container > .panel-item:hover {
+			border-color: rgba(100, 148, 237, 0.4) !important;
+			background-color: rgba(100, 148, 237, 0.15) !important;
+		}
+
+		.filemanager__panel-container > .panel-item.selected {
+			border-color: rgba(100, 148, 237, 0.7) !important;
+			background-color: rgba(100, 148, 237, 0.4) !important;
+		}
+
+		.filemanager__panel-container > .panel-item > .panel-item__thumb {
+			height: 120px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+.panel-item > .panel-item__thumb > img {
+	object-fit: cover;
+	padding: 5px;
+}
+
+.filemanager__panel-container > .panel-item > .panel-item__filename {
+	margin-top: 5px;
+	font-size: small;
+	text-align: center;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.filemanager__panel .panel-toolbox {
+	padding: 5px 10px;
+}
+.filemanager__panel > .panel-bottom {
+	padding: 3px 10px;
+	background-color: #f3fbfb;
+	font-size: small;
+}
+.fbutton {
+	padding: 5px;
+	background-color: transparent;
+	border: 1px solid #3c4c84;
+	border-radius: 4px;
+	cursor: pointer;
+}

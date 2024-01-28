@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34003.232
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileManager", "FileManager\FileManager.csproj", "{3EA467DC-2778-4126-B811-CFD2A0C8EC21}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "elFinder", "elFinder\elFinder.csproj", "{3EDBCC34-7189-4636-B653-B88FBE072566}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,12 +15,11 @@ Global
 		{3EA467DC-2778-4126-B811-CFD2A0C8EC21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EA467DC-2778-4126-B811-CFD2A0C8EC21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EA467DC-2778-4126-B811-CFD2A0C8EC21}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3EDBCC34-7189-4636-B653-B88FBE072566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3EDBCC34-7189-4636-B653-B88FBE072566}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3EDBCC34-7189-4636-B653-B88FBE072566}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3EDBCC34-7189-4636-B653-B88FBE072566}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6E7BCEE6-AC38-4576-81CE-0222F07913CE}
 	EndGlobalSection
 EndGlobal

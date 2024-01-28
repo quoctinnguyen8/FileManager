@@ -1,0 +1,76 @@
+:root {
+	--dir-level-step: 5px;
+}
+
+.filemanager__container * {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+.filemanager__container {
+	border-radius: 5px;
+	border: 1px solid gray;
+	box-shadow: 0 0 10px #80808058;
+}
+
+	.filemanager__container > .filemanager__dir-tree {
+		height: 500px;
+		max-height: 80vh;
+		width: 300px;
+		overflow: auto;
+		border-right: 1px solid gray;
+	}
+
+.filemanager__dir-tree > .dir-item {
+	padding: 5px;
+	border-bottom: 1px solid #eeeeee;
+}
+
+	.filemanager__dir-tree > .dir-item:hover {
+		background: #eeeeee;
+		cursor: pointer;
+	}
+
+
+
+	/*Cấu hình lùi dòng, tối đa 10 cấp*/
+	.filemanager__dir-tree > .dir-item.dir-item-level-1 {
+		margin-left: 0px !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-2 {
+		margin-left: calc(var(--dir-level-step) * 2) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-3 {
+		margin-left: calc(var(--dir-level-step) * 3) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-4 {
+		margin-left: calc(var(--dir-level-step) * 4) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-5 {
+		margin-left: calc(var(--dir-level-step) * 5) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-6 {
+		margin-left: calc(var(--dir-level-step) * 6) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-7 {
+		margin-left: calc(var(--dir-level-step) * 7) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-8 {
+		margin-left: calc(var(--dir-level-step) * 8) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-9 {
+		margin-left: calc(var(--dir-level-step) * 9) !important;
+	}
+
+	.filemanager__dir-tree > .dir-item.dir-item-level-10 {
+		margin-left: calc(var(--dir-level-step) * 10) !important;
+	}
