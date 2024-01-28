@@ -30,7 +30,7 @@ document.addEventListener('alpine:init', () => {
 		_dirSelectedIndex: -1,
 		_dirSelectedPath: '',
 
-		// Danh sách file trong thư mục
+		// Danh sách file trong thư mục, hiển thị ở panel (khu vực chính của filemanager)
 		_filesAndFolders: [
 			//{
 			//	isFolder: false,
@@ -101,6 +101,7 @@ document.addEventListener('alpine:init', () => {
 			this._dirs = dirsBefore.concat(this._dirs.slice(idx + 1));
 		},
 
+		// Nhận item và hiển thị ở panel
 		getFilesAndFoldersIn(dirName) {
 			this._cmdData.command = "select_all";
 			this._cmdData.value = dirName;
@@ -132,10 +133,15 @@ document.addEventListener('alpine:init', () => {
 				}
 			});
 		},
+
+		// Sự kiện khi click vào 1 item trên panel
 		selectItemInPanel(fullPath, idx) {
 			this._fileSelectedIndex = idx;
 			this._fileSelected = this._filesAndFolders[idx].name;
 		},
+
+		// Sự kiện khi double-click vào 1 item trên panel
+		// TODO: Hiện tại chỉ có xử lsy mở folder, càn thêm xử lý tải file
 		openItem(itemOnPanel) {
 			if (itemOnPanel.isFolder) {
 				var idx = this._dirs.findIndex(d => d.fullPath == itemOnPanel.fullPath);
@@ -151,6 +157,9 @@ document.addEventListener('alpine:init', () => {
 			}
 			this.getDirsIn(dir, idx);
 		},
+
+		// Sự kiện khi nhấn nút 'Upload' trên toolbox
+		// Do hạn chế về thời gian và công nghệ, hiện tại đang cho upload file dưới dạng base64
 		async uploadFile() {
 			if (this._dirSelectedIndex >= 0) {
 				this._uploadData.dir = this._dirs[this._dirSelectedIndex].fullPath;
@@ -211,6 +220,8 @@ document.addEventListener('alpine:init', () => {
 				}
 			});
 		},
+
+		// Sự kiện khi chọn file để upload
 		changeLabelUpload() {
 			var files = this.$refs.fileUpload.files;
 			var lbl = this.$refs.labelFileUpload;
@@ -237,6 +248,7 @@ document.addEventListener('alpine:init', () => {
 	}));
 });
 
+// Hàm convert file thành base64
 const toBase64 = file => new Promise((resolve, reject) => {
 	const reader = new FileReader();
 	reader.readAsDataURL(file);

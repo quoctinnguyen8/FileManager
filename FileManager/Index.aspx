@@ -7,7 +7,7 @@
     <html xmlns="http://www.w3.org/1999/xhtml">
 
     <head runat="server">
-        <title></title>
+        <title>Demo chức năng quản lý file đơn giản trên webform</title>
         <link href="~/assets/libs/filemanager/filemanager.css" rel="stylesheet" />
     </head>
 
