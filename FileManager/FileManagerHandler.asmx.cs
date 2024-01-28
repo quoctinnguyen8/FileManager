@@ -34,6 +34,7 @@ namespace FileManager
 		private const string DEFAULT_IMAGE_ICON = "/assets/libs/filemanager/icon/file-image-solid.svg";
 		private const string DEFAULT_PDF_ICON = "/assets/libs/filemanager/icon/file-pdf-solid.svg";
 		private const string DEFAULT_POWERPOINT_ICON = "/assets/libs/filemanager/icon/file-powerpoint-solid.svg";
+		private const string DEFAULT_VIDEO_ICON = "/assets/libs/filemanager/icon/file-video-solid.svg";
 		private const string DEFAULT_WORD_ICON = "/assets/libs/filemanager/icon/file-word-solid.svg";
 
 
@@ -55,6 +56,7 @@ namespace FileManager
 			_fileExtMapper.Add(DEFAULT_IMAGE_ICON, new string[] { ".jpeg", ".jpg", ".png", ".gif", ".webp", ".tiff" });
 			_fileExtMapper.Add(DEFAULT_PDF_ICON, new string[] { ".pdf" });
 			_fileExtMapper.Add(DEFAULT_POWERPOINT_ICON, new string[] { ".ppt", ".pptx" });
+			_fileExtMapper.Add(DEFAULT_VIDEO_ICON, new string[] { ".mp4" });
 			_fileExtMapper.Add(DEFAULT_WORD_ICON, new string[] { ".doc", ".docx" });
 		}
 
