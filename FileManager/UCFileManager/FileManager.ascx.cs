@@ -12,6 +12,7 @@ namespace FileManager.UCFileManager
         // TODO: Cho phép nhiều component trong 1 trang, phân biệt nhau bằng tên
         public string Name { get; set; }
         public string AjaxPath { get; set; } 
+        public bool IsPopup { get; set; } 
         protected void Page_Load(object sender, EventArgs e)
         {
 

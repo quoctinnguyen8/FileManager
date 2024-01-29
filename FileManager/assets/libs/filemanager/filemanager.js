@@ -1,5 +1,13 @@
+String.prototype.isImage = function () {
+	var segments = this.split('.');
+	if (segments.length <= 1) return false;
+	var ext = segments.pop().toLowerCase();
+	return ['png', 'jpeg', 'jpg', 'gif', 'webp'].indexOf(ext) >= 0;
+}
+
+
 document.addEventListener('alpine:init', () => {
-	Alpine.data('filemanager', (name, fileManagerAjaxUrl) => ({
+	Alpine.data('filemanager', (name, fileManagerAjaxUrl, isPopup) => ({
 		_url: {
 			executeCmd: fileManagerAjaxUrl + '/ExecuteCommand',
 			upload: fileManagerAjaxUrl + '/Upload'
@@ -10,6 +18,13 @@ document.addEventListener('alpine:init', () => {
 		},
 		_toolbox: {
 			isShowNewFolder: false,
+		},
+		_popupProperty: {
+			popup: !!isPopup,
+			show: false
+		},
+		_setting: {
+			rootPath: "/upload"
 		},
 
 		// Chức năng upload
@@ -40,10 +55,15 @@ document.addEventListener('alpine:init', () => {
 		],
 		_fileSelectedIndex: -1,
 		_fileSelected: '',
+		// callback cho sự kiện chọn file ở mode popup
+		_tinyMCE: {
+			callback: null,
+			value: null,
+			meta: null
+		},
 
 		init() {
 			this._dirs = [];
-			this.reloadPanel();
 			this.addCustomEvent();
 			this.$watch('_fileSelectedIndex', (newVal, oldVal) => {
 				if (newVal >= 0) {
@@ -52,6 +72,11 @@ document.addEventListener('alpine:init', () => {
 					window[`filemanager.${name}.selectedValue`] = '';
 				}
 			});
+			// Hiển thị thư mục ngay nếu không phải là popup
+			// Nếu là popup thì chờ kích hoạt event mới hiện
+			if (!this._popupProperty.popup) {
+				this.reloadPanel();
+			}
 		},
 
 		getDirsIn(dirObj, idx) {
@@ -142,10 +167,26 @@ document.addEventListener('alpine:init', () => {
 
 		// Sự kiện khi double-click vào 1 item trên panel
 		// TODO: Hiện tại chỉ có xử lsy mở folder, càn thêm xử lý tải file
-		openItem(itemOnPanel) {
+		openFolderOrSelectFile(itemOnPanel) {
 			if (itemOnPanel.isFolder) {
 				var idx = this._dirs.findIndex(d => d.fullPath == itemOnPanel.fullPath);
 				this.getDirsIn(this._dirs[idx], idx);
+				return;
+			}
+			// double click lên file
+			// ở mode popup thì gọi callback
+			if (this._popupProperty.popup) {
+				if (this._tinyMCE.callback) {
+					var fullFileName = this._setting.rootPath + "/" + itemOnPanel.fullPath.replace(/\\/g, '/');
+					if (!fullFileName.isImage()) {
+						alert("Không phải ảnh");
+						return;
+					}
+
+					this._tinyMCE.callback(fullFileName, { text: itemOnPanel.name });
+					// đóng popup
+					this._popupProperty.show = false;
+				}
 			}
 		},
 		reloadPanel() {
@@ -242,11 +283,39 @@ document.addEventListener('alpine:init', () => {
 				lbl.setAttribute("title", "");
 			}
 		},
+		showFileManagerAsPopup() {
+			this.reloadPanel();
+			this._popupProperty.show = true;
+		},
 		addCustomEvent() {
-			// TODO
+			// sự kiện show file-manager
+			var eventName = `filemanager.${name}.showAsPopup`;
+			document.addEventListener(eventName, (e) => {
+				this.showFileManagerAsPopup();
+			});
+
+			// sự kiện khi file được chọn
+			eventName = `filemanager.${name}.setCallbackTinyMCE`;
+			document.addEventListener(eventName, (e) => {
+				this._tinyMCE.callback = e.detail;
+			});
 		}
 	}));
 });
+
+var FileManager = function (name) {
+	this.showFileManagerAsPopup = function () {
+		var eventName = `filemanager.${name}.showAsPopup`;
+		var event = new CustomEvent(eventName);
+		document.dispatchEvent(event);
+
+	}
+	this.setFileManagerCallback = function (callback) {
+		var eventName = `filemanager.${name}.setCallbackTinyMCE`;
+		var event = new CustomEvent(eventName, { detail: callback });
+		document.dispatchEvent(event);
+	}
+}
 
 // Hàm convert file thành base64
 const toBase64 = file => new Promise((resolve, reject) => {

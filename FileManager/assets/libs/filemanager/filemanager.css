@@ -1,15 +1,58 @@
 :root {
 	--dir-level-step: 7px;
 	--left-col-width: 250px;
+	--popup-zindex: 2000;
+	--popup-margin-y: 30px;
 }
 
-.filemanager__container * {
-	padding: 0;
-	margin: 0;
-	box-sizing: border-box;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	color: #393939;
+.filemanager__backdrop.popup {
+	background-color: rgb(110, 110, 110, 0.15);
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: var(--popup-zindex);
+	display: none;
 }
+	.filemanager__backdrop.popup.show {
+		display: block;
+	}
+
+	.filemanager__backdrop.popup .filemanager__container {
+		width: 90%;
+		margin: var(--popup-margin-y) auto;
+	}
+.filemanager__close-popup{
+	position: absolute;
+	top: var(--popup-margin-y);
+	right: 5%;
+	transform: translate(50%, -50%);
+	background-color: rgb(255, 255, 255, 0.5);
+	color: crimson;
+	width: 30px;
+	height: 30px;
+	line-height:30px;
+	font-size: 30px;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: center;
+	font-weight: 400;
+	user-select: none;
+	transition: 0.3s all;
+}
+	.filemanager__close-popup:hover {
+		background-color: rgb(227, 58, 58, 0.50);
+		color: white;
+	}
+
+	.filemanager__container * {
+		padding: 0;
+		margin: 0;
+		box-sizing: border-box;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		color: #393939;
+	}
 
 .filemanager__container {
 	border-radius: 5px;
@@ -17,6 +60,7 @@
 	box-shadow: 0 0 10px #80808058;
 	display: flex;
 	height: 500px;
+	background: white;
 	overflow: hidden;
 }
 
