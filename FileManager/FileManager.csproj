@@ -228,6 +228,7 @@
     <Content Include="Global.asax" />
     <Content Include="Index.aspx" />
     <None Include="upload\.tmb\.gitkeep" />
+    <Content Include="upload\pic1.jpg" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
