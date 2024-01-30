@@ -24,7 +24,9 @@ document.addEventListener('alpine:init', () => {
 			show: false
 		},
 		_setting: {
-			rootPath: "/upload"
+			rootPath: "/upload",	// Dùng để thêm vào trước đường dẫn file
+			maxFileSizeAllow: 0,	// Kích thước file tối đa tính bằng byte
+			thumbPath: "/.tmb"
 		},
 
 		// Chức năng upload
@@ -56,11 +58,7 @@ document.addEventListener('alpine:init', () => {
 		_fileSelectedIndex: -1,
 		_fileSelected: '',
 		// callback cho sự kiện chọn file ở mode popup
-		_tinyMCE: {
-			callback: null,
-			value: null,
-			meta: null
-		},
+		_onFileSelectedCallback: null,
 
 		init() {
 			this._dirs = [];
@@ -72,11 +70,22 @@ document.addEventListener('alpine:init', () => {
 					window[`filemanager.${name}.selectedValue`] = '';
 				}
 			});
+			this.getSetting();
 			// Hiển thị thư mục ngay nếu không phải là popup
 			// Nếu là popup thì chờ kích hoạt event mới hiện
 			if (!this._popupProperty.popup) {
 				this.reloadPanel();
 			}
+		},
+		getSetting() {
+			this._cmdData.command = "get_setting";
+			this._cmdData.value = '';
+			$.get(this._url.executeCmd, this._cmdData)
+				.then((res) => {
+					this._setting.rootPath = res.Data.rootPath;
+					this._setting.maxFileSizeAllow = res.Data.maxFileSizeAllow;
+					this._setting.thumbPath = res.Data.thumbPath;
+				});
 		},
 
 		getDirsIn(dirObj, idx) {
@@ -173,20 +182,12 @@ document.addEventListener('alpine:init', () => {
 				this.getDirsIn(this._dirs[idx], idx);
 				return;
 			}
+
 			// double click lên file
 			// ở mode popup thì gọi callback
-			if (this._popupProperty.popup) {
-				if (this._tinyMCE.callback) {
-					var fullFileName = this._setting.rootPath + "/" + itemOnPanel.fullPath.replace(/\\/g, '/');
-					if (!fullFileName.isImage()) {
-						alert("Không phải ảnh");
-						return;
-					}
-
-					this._tinyMCE.callback(fullFileName, { text: itemOnPanel.name });
-					// đóng popup
-					this._popupProperty.show = false;
-				}
+			if (this._onFileSelectedCallback) {
+				var fullFileName = this._setting.rootPath + "/" + itemOnPanel.fullPath.replace(/\\/g, '/');
+				this._onFileSelectedCallback(fullFileName);
 			}
 		},
 		reloadPanel() {
@@ -209,35 +210,47 @@ document.addEventListener('alpine:init', () => {
 			}
 			this._uploadData.fileNames = [];
 			this._uploadData.base64Values = [];
-			var files = this.$refs.fileUpload.files;
-			if (files) {
-				for (var i = 0; i < files.length; i++) {
-					this._uploadData.fileNames.push(files[i].name);
-					let base64 = await toBase64(files[i]);
-					base64 = base64.split(",")[1];
-					this._uploadData.base64Values.push(base64);
-				}
-				$.ajax({
-					type: "POST",
-					url: this._url.upload,
-					async: true,
-					data: JSON.stringify(this._uploadData),
-					contentType: 'application/json',
-					success: (data) => {
-						this.reloadPanel();
-					},
-					error: function (error) {
-						// handle error
-					},
-					complete: () => {
-						this.$refs.fileUpload.value = "";
-						this.changeLabelUpload();
-					}
-				});
+			var files = this.$refs['fileUpload_' + name].files;
+			if (!files) {
+				alert('Chưa chọn file');
+				return;
 			}
+
+			for (var i = 0; i < files.length; i++) {
+				if (files[i].size == 0) {
+					alert(`Tệp ${files[i].name} không hợp lệ.`);
+					return;
+				}
+				if (files[i].size > this._setting.maxFileSizeAllow) {
+					var maxSizeInMB = parseFloat(this._setting.maxFileSizeAllow / 1024 / 1024).toFixed(2);
+					alert(`Tệp ${files[i].name} vượt quá kích thước tối đa. Tối đa ${maxSizeInMB}MB.`);
+					return;
+				}
+				this._uploadData.fileNames.push(files[i].name);
+				let base64 = await toBase64(files[i]);
+				base64 = base64.split(",")[1];
+				this._uploadData.base64Values.push(base64);
+			}
+			$.ajax({
+				type: "POST",
+				url: this._url.upload,
+				async: true,
+				data: JSON.stringify(this._uploadData),
+				contentType: 'application/json',
+				success: (data) => {
+					this.reloadPanel();
+				},
+				error: function (error) {
+					// handle error
+				},
+				complete: () => {
+					this.$refs['fileUpload_' + name].value = "";
+					this.changeLabelUpload();
+				}
+			});
 		},
 		createNewFolder() {
-			var folderName = this.$refs.newFolderName.value;
+			var folderName = this.$refs['newFolderName_' + name].value;
 
 			if (!folderName) {
 				alert("Chưa nhập tên thư mục!");
@@ -252,20 +265,20 @@ document.addEventListener('alpine:init', () => {
 				url: this._url.executeCmd,
 				data: this._cmdData,
 				success: (res) => {
-					this.$refs.newFolderName.value = '';
+					this.$refs['newFolderName_' + name].value = '';
 					this.reloadPanel();
 				},
 				error: (err) => {
 					alert(err.responseJSON.Message);
-					this.$refs.newFolderName.focus();
+					this.$refs['newFolderName_' + name].focus();
 				}
 			});
 		},
 
 		// Sự kiện khi chọn file để upload
 		changeLabelUpload() {
-			var files = this.$refs.fileUpload.files;
-			var lbl = this.$refs.labelFileUpload;
+			var files = this.$refs['fileUpload_' + name].files;
+			var lbl = this.$refs['labelFileUpload_' + name];
 			if (files && files.length) {
 				if (files.length == 1) {
 					lbl.innerText = files[0].name;
@@ -295,9 +308,15 @@ document.addEventListener('alpine:init', () => {
 			});
 
 			// sự kiện khi file được chọn
-			eventName = `filemanager.${name}.setCallbackTinyMCE`;
+			eventName = `filemanager.${name}.onFileSelected`;
 			document.addEventListener(eventName, (e) => {
-				this._tinyMCE.callback = e.detail;
+				this._onFileSelectedCallback = e.detail.callback;
+			});
+
+			// sự kiện để đóng popup từ bên ngoài x-data
+			eventName = `filemanager.${name}.close`;
+			document.addEventListener(eventName, (e) => {
+				this._popupProperty.show = false;
 			});
 		}
 	}));
@@ -310,9 +329,19 @@ var FileManager = function (name) {
 		document.dispatchEvent(event);
 
 	}
-	this.setFileManagerCallback = function (callback) {
-		var eventName = `filemanager.${name}.setCallbackTinyMCE`;
-		var event = new CustomEvent(eventName, { detail: callback });
+
+	this.closePopup = function () {
+		var eventName = `filemanager.${name}.close`;
+		var event = new CustomEvent(eventName);
+		document.dispatchEvent(event);
+	}
+	this.onFileSelected = function (callback) {
+		var eventName = `filemanager.${name}.onFileSelected`;
+		var event = new CustomEvent(eventName, {
+			detail: {
+				callback: callback
+			}
+		});
 		document.dispatchEvent(event);
 	}
 }

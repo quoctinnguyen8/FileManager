@@ -4,6 +4,7 @@
 <div x-data="filemanager('<%=Name %>','<%=AjaxPath %>', '<%=IsPopup ? "true" : "" %>')" class="filemanager__backdrop" :class="_popupProperty">
     <div x-show="_popupProperty.popup" x-on:click="_popupProperty.show = false" class="filemanager__close-popup">&times;</div>
     <div class="filemanager__container">
+        <%--Cây thư mục--%>
         <div class="filemanager__dir-tree">
             <div class="dir-item" x-on:click="getDirsIn(null, -1)">
             <img src="assets/libs/filemanager/icon/hdd-solid.svg" class="dir-icon" />
@@ -24,21 +25,23 @@
             </template>
         </div>
 
+        <%--Phần chính, hiển thị file, thư mục và toolbox--%>
         <div class="filemanager__panel">
             <div class="panel-toolbox">
                 <div class="panel-toolbox__upload-file">
-                    <input type="file" id="fInputFileUpload" x-ref="fileUpload" multiple x-on:change="changeLabelUpload()" />
-                    <label x-ref="labelFileUpload" for="fInputFileUpload">Nhấn để chọn file</label>
-                    <button x-on:click="uploadFile()" class="fbutton" type="button">Upload</button>
+                    <input type="file" id="fInputFileUpload_<%=Name %>" x-ref="fileUpload_<%=Name %>" multiple x-on:change="changeLabelUpload()" />
+                    <label x-ref="labelFileUpload_<%=Name %>" for="fInputFileUpload_<%=Name %>">Nhấn để chọn file</label>
+                    <button x-on:click="uploadFile()" title="Tải tệp lên" class="fbutton" type="button"><i class="fi fi-file-upload"></i></button>
                 </div>
                 <div class="panel-toolbox__new-folder ml-1">
                     <div class="d-flex" x-show="_toolbox.isShowNewFolder">
-                        <input type="text" class="finput-text" x-ref="newFolderName" placeholder="Tên thư mục mới" />
+                        <input type="text" class="finput-text" x-ref="newFolderName_<%=Name %>" placeholder="Tên thư mục mới" />
                         <button class="fbutton ml-1" type="button" x-on:click="createNewFolder()">Tạo</button>
                         <button class="fbutton red ml-1" type="button" x-on:click="_toolbox.isShowNewFolder = false">&times;</button>
                     </div>
-                    <button class="fbutton ml-1" type="button" x-on:click="_toolbox.isShowNewFolder = true" x-show="_toolbox.isShowNewFolder == false">
-                        <img src="/assets/libs/filemanager/icon/folder-plus-solid.svg" class="dir-icon"/>
+                    <button class="fbutton ml-1" type="button" title="Tạo thư mục mới"
+                        x-on:click="_toolbox.isShowNewFolder = true" x-show="_toolbox.isShowNewFolder == false">
+                        <i class="fi fi-folder-plus"></i>
                     </button>
                 </div>
             </div>

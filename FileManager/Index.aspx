@@ -22,8 +22,13 @@
             <uc1:FileManager runat="server" ID="FileManager" Name="NameOfFileManager" AjaxPath="/FileManagerHandler.asmx" />
 
             <br />
-            <h3>Tương tác với TinyMCE (Double click để chọn ảnh)</h3>
             <uc1:FileManager runat="server" ID="FileManager1" Name="FileManagerPopup" IsPopup="true" AjaxPath="/FileManagerHandler.asmx" />
+
+            <h3>Chọn ảnh và nhận link (Double click để chọn ảnh)</h3>
+            <input id="txtOutputLink" type="text" size="50" />
+            <button id="btnOpenFileManager" type="button">Mở popup</button>
+            <br />
+            <h3>Tương tác với TinyMCE (Double click để chọn ảnh)</h3>
             <textarea id="tinyMCEEditor"></textarea>
         </div>
     </form>
@@ -35,11 +40,33 @@
     <script src="/assets/libs/filemanager/filemanager.js"></script>
 
     <script>
-        var tinymecShowFileManager = (callback, value, meta) => {
+        // Mở popup khi nhấn vào button
+        $("#btnOpenFileManager").click((ev) => {
+            // Tạo đối tượng để làm việc với FileManager thông qua Name
             var fm = new FileManager('FileManagerPopup');
-            // Để tên của file-manager cần show, thuộc tính Name
-            fm.setFileManagerCallback(callback);
+
             fm.showFileManagerAsPopup();
+            // Setup sự kiện khi chọn file
+            fm.onFileSelected((filename) => {
+                // Setting filename vào input
+                $("#txtOutputLink").val(filename);
+                // Đóng popup
+                fm.closePopup();
+            });
+        });
+
+
+        // function xử lý khi chọn button Duyệt file trong TinyMCE
+        var tinymceFileManager = (callback, value, meta) => {
+            // Tạo đối tượng để làm việc với FileManager thông qua Name
+            var fm = new FileManager('FileManagerPopup');
+
+            fm.showFileManagerAsPopup();
+            // Để tên của file-manager cần show, thuộc tính Name
+            fm.onFileSelected((filename) => {
+                callback(filename, { alt: '' });
+                fm.closePopup();
+            });
         }
         var tinymceSetting = {
             selector: '#tinyMCEEditor',
@@ -48,7 +75,7 @@
             menubar: 'file edit view insert format tools table help',
             toolbar: "undo redo | accordion accordionremove | blocks fontfamily fontsize | link image | bold italic underline strikethrough | align numlist bullist | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl",
             importcss_append: true,
-            file_picker_callback: tinymecShowFileManager,
+            file_picker_callback: tinymceFileManager,
             height: 600,
             image_caption: true,
             quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quicktable',

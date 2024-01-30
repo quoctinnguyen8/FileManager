@@ -20,7 +20,7 @@ namespace FileManager
 	public class FileManagerHandler : System.Web.Services.WebService
 	{
 		// Thư mục upload file
-		private const string ROOT_DIR = "upload";
+		private const string ROOT_DIR = "/upload";
 		// Thư mục chứa ảnh xem trước
 		// TODO: dùng cho chức năng tạo thumbnail
 		private const string THUMB_DIR = ".tmb";
@@ -37,8 +37,8 @@ namespace FileManager
 		private const string DEFAULT_VIDEO_ICON = "/assets/libs/filemanager/icon/file-video-solid.svg";
 		private const string DEFAULT_WORD_ICON = "/assets/libs/filemanager/icon/file-word-solid.svg";
 
-
-		private const int MAX_FILE_SIZE_KB = 5000;  // Kích thước file upload tối đa, tính bằng KB
+		// Kích thước file upload tối đa, tính bằng BYTE
+		private const long MAX_FILE_SIZE_IN_BYTE = 5 * 1024 * 1024;  // 5MB
 		private const string ERR_DIR_NOT_FOUND = "Không tìm thấy thư mục.";
 		private const string ERR_DIR_EXISTS = "Thư mục đã tồn tại.";
 		private const string ERR_FILE_NOT_FOUND = "Không tìm thấy tệp.";
@@ -48,8 +48,8 @@ namespace FileManager
 		private string RootPath { get { return Server.MapPath(ROOT_DIR); } }
 
 		private readonly Dictionary<string, string[]> _fileExtMapper = new Dictionary<string, string[]>();
-        public FileManagerHandler()
-        {
+		public FileManagerHandler()
+		{
 			_fileExtMapper.Add(DEFAULT_ARCHIVE_ICON, new string[] { ".rar", ".zip", ".7z" });
 			_fileExtMapper.Add(DEFAULT_AUDIO_ICON, new string[] { ".mp3" });
 			_fileExtMapper.Add(DEFAULT_EXCEL_ICON, new string[] { ".xls", ".xlsx", ".csv" });
@@ -60,45 +60,78 @@ namespace FileManager
 			_fileExtMapper.Add(DEFAULT_WORD_ICON, new string[] { ".doc", ".docx" });
 		}
 
-        /// <summary>
-        /// Upload file
-        /// </summary>
-        /// <param name="dir">Thư mục chứa file upload</param>
-        /// <returns>true nếu upload thành công</returns>
-        [WebMethod]
-		[ScriptMethod]
-		public void Upload(string dir, string[] fileNames, string[] base64Values)
+		/// <summary>
+		/// Upload file
+		/// </summary>
+		/// <param name="dir">Thư mục chứa file upload</param>
+		/// <returns>true nếu upload thành công</returns>
+		[WebMethod]
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+		public CommonResponseModel Upload(string dir, string[] fileNames, string[] base64Values)
 		{
 			dir = StandardizeDir(dir);
+			var errMesg = "";
 			var fullDirPath = Path.Combine(RootPath, dir);
 			if (fileNames.Length != base64Values.Length)
 			{
-				ResponseErrorJson(HttpStatusCode.BadRequest, ERR_BAD_REUQEST);
-				return;
+				return new CommonResponseModel
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Message = ERR_BAD_REUQEST
+				};
 			}
 
 			if (!Directory.Exists(fullDirPath))
 			{
-				ResponseErrorJson(HttpStatusCode.BadRequest, ERR_DIR_NOT_FOUND);
-				return;
+				return new CommonResponseModel
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Message = ERR_DIR_NOT_FOUND
+				};
 			}
 			for (int i = 0; i < fileNames.Length; i++)
 			{
 				var fullFilePath = Path.Combine(fullDirPath, fileNames[i]);
-				if (!File.Exists(fullFilePath))
+
+				// Nếu trùng tên thì thêm _2 vào tên file
+				while (File.Exists(fullFilePath))
 				{
-					File.WriteAllBytes(fullFilePath, Convert.FromBase64String(base64Values[i]));
+					var fileWithoutExt = Path.GetFileNameWithoutExtension(fullFilePath);
+					var fileExt = Path.GetExtension(fullFilePath);
+					var folderPath = Path.GetDirectoryName(fullFilePath);
+					fullFilePath = Path.Combine(folderPath, fileWithoutExt + "_2" + fileExt);
+				}
+
+				var bytes = Convert.FromBase64String(base64Values[i]);
+				if (bytes.LongLength <= MAX_FILE_SIZE_IN_BYTE)
+				{
+					File.WriteAllBytes(fullFilePath, bytes);
+				}
+				else
+				{
+					errMesg += string.Format("Tệp [{0} ({1:N2}MB)] vượt quá kích thước tối đa của hệ thống ({2:N2}MB)\n",
+								fileNames[i],
+								(double)bytes.LongLength / 1024 / 1024,
+								(double)MAX_FILE_SIZE_IN_BYTE / 1024 / 1024);
 				}
 			}
 
-			ResponseSuccessJson("", "Tải lên thành công " + fileNames.Length + " tệp.");
-			return;
+			if (!string.IsNullOrEmpty(errMesg))
+			{
+				return new CommonResponseModel
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Message = errMesg
+				};
+			}
+			return new CommonResponseModel
+			{
+				StatusCode = HttpStatusCode.OK,
+				Message = "Tải lên thành công " + fileNames.Length + " tệp."
+			};
 		}
 
-
-		[WebMethod]
-		[ScriptMethod(UseHttpGet = true)]
-		public void GetDirectories(string subDir = "")
+		private void GetDirectories(string subDir = "")
 		{
 			try
 			{
@@ -120,9 +153,7 @@ namespace FileManager
 			}
 		}
 
-		[WebMethod]
-		[ScriptMethod(UseHttpGet = true)]
-		public void GetFilesAndFoldersInDir(string subDir = "")
+		private void GetFilesAndFoldersInDir(string subDir = "")
 		{
 			try
 			{
@@ -162,11 +193,15 @@ namespace FileManager
 
 		[WebMethod]
 		[ScriptMethod]
-
 		public void ExecuteCommand(string command, string value)
 		{
 			switch (command)
 			{
+				case "get_setting":
+					{
+						GetSetting();
+						break;
+					}
 				case "create_folder":
 					{
 						CreateFolder(value);
@@ -188,6 +223,16 @@ namespace FileManager
 						break;
 					}
 			}
+		}
+
+		private void GetSetting()
+		{
+			ResponseSuccessJson(new
+			{
+				rootPath = ROOT_DIR,
+				maxFileSizeAllow = MAX_FILE_SIZE_IN_BYTE,
+				thumbPath = ROOT_DIR + "/" + THUMB_DIR,
+			});
 		}
 
 		/// <summary>
@@ -245,12 +290,11 @@ namespace FileManager
 				Data = obj
 			};
 			var json = JsonConvert.SerializeObject(objResponse);
-			Context.Response.ClearContent();
+			Context.Response.Clear();
+			Context.Response.BufferOutput = true;
 			Context.Response.ContentType = "application/json; charset=utf-8";
 			Context.Response.StatusCode = (int)HttpStatusCode.OK;
 			Context.Response.Write(json);
-			Context.Response.Flush();
-			Context.Response.End();
 		}
 		private void ResponseErrorJson(HttpStatusCode statusCode, string errMessage)
 		{
@@ -260,11 +304,10 @@ namespace FileManager
 				Message = errMessage
 			};
 			Context.Response.Clear();
+			Context.Response.BufferOutput = true;
 			Context.Response.ContentType = "application/json";
 			Context.Response.StatusCode = (int)statusCode;
 			Context.Response.Write(JsonConvert.SerializeObject(objResponse));
-			Context.Response.Flush();
-			Context.Response.End();
 		}
 
 		private void CreateThumbForFiles(List<FileAndFolderModel> files)
@@ -274,7 +317,8 @@ namespace FileManager
 				var fileExt = Path.GetExtension(files[i].Path).ToLower();
 				foreach (var m in _fileExtMapper)
 				{
-					if (m.Value.Contains(fileExt)) {
+					if (m.Value.Contains(fileExt))
+					{
 						files[i].ThumbPath = m.Key;
 						break;
 					}
@@ -285,6 +329,13 @@ namespace FileManager
 				}
 			}
 		}
+	}
+
+	public class CommonResponseModel
+	{
+		public HttpStatusCode StatusCode { get; set; }
+		public string Message { get; set; }
+		public object Data { get; set; }
 	}
 
 	public class FileAndFolderModel

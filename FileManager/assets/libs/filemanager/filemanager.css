@@ -279,3 +279,18 @@
 	.finput-text:focus {
 		box-shadow: 0 0 0 1px rgba(100, 148, 237, 0.5);
 	}
+
+.fi::after{
+	content: ' [....] ';
+	color: transparent;
+	display: inline-block;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center center;
+}
+.fi-folder-plus::after {
+	background-image: url('icon/folder-plus-solid.svg');
+}
+.fi-file-upload::after{
+	background-image: url('icon/file-upload-solid.svg');
+}
