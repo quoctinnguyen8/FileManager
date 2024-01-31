@@ -140,6 +140,7 @@
 	padding: 10px;
 	height: calc(100% - 62px);
 	overflow: auto;
+	align-content: flex-start;
 }
 
 	.filemanager__panel-container > .panel-item {
@@ -293,4 +294,7 @@
 }
 .fi-file-upload::after{
 	background-image: url('icon/file-upload-solid.svg');
+}
+.fi-sync::after {
+	background-image: url('icon/sync-solid.svg');
 }

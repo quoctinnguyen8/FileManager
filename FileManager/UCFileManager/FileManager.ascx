@@ -37,11 +37,17 @@
                     <div class="d-flex" x-show="_toolbox.isShowNewFolder">
                         <input type="text" class="finput-text" x-ref="newFolderName_<%=Name %>" placeholder="Tên thư mục mới" />
                         <button class="fbutton ml-1" type="button" x-on:click="createNewFolder()">Tạo</button>
-                        <button class="fbutton red ml-1" type="button" x-on:click="_toolbox.isShowNewFolder = false">&times;</button>
+                        <button class="fbutton red ml-1" type="button" x-on:click="_toolbox.isShowNewFolder = false" title="Đóng">&times;</button>
                     </div>
                     <button class="fbutton ml-1" type="button" title="Tạo thư mục mới"
                         x-on:click="_toolbox.isShowNewFolder = true" x-show="_toolbox.isShowNewFolder == false">
                         <i class="fi fi-folder-plus"></i>
+                    </button>
+                </div>
+                <div class="d-flex ml-1">
+                    <button class="fbutton" type="button" title="Làm mới"
+                        x-on:click="reloadPanel()">
+                        <i class="fi fi-sync"></i>
                     </button>
                 </div>
             </div>

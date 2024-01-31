@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Script.Services;
 using System.Web.Services;
@@ -20,7 +22,7 @@ namespace FileManager
 	public class FileManagerHandler : System.Web.Services.WebService
 	{
 		// Thư mục upload file
-		private const string ROOT_DIR = "/upload";
+		private const string UPLOAD_ROOT_DIR = "/upload";
 		// Thư mục chứa ảnh xem trước
 		// TODO: dùng cho chức năng tạo thumbnail
 		private const string THUMB_DIR = ".tmb";
@@ -39,13 +41,16 @@ namespace FileManager
 
 		// Kích thước file upload tối đa, tính bằng BYTE
 		private const long MAX_FILE_SIZE_IN_BYTE = 5 * 1024 * 1024;  // 5MB
+		// Kích thước ảnh preview, tính bằng px
+		private const int THUMBNAIL_MAX_SIZE = 80;
+
 		private const string ERR_DIR_NOT_FOUND = "Không tìm thấy thư mục.";
 		private const string ERR_DIR_EXISTS = "Thư mục đã tồn tại.";
 		private const string ERR_FILE_NOT_FOUND = "Không tìm thấy tệp.";
 		private const string ERR_BAD_REUQEST = "Dữ liệu không hợp lệ.";
 		private const string ERR_INTERNAL_SERVER = "Đã xảy ra lỗi trong quá trình xử lý yêu cầu (500). ";
 
-		private string RootPath { get { return Server.MapPath(ROOT_DIR); } }
+		private string RootPath { get { return Server.MapPath(UPLOAD_ROOT_DIR); } }
 
 		private readonly Dictionary<string, string[]> _fileExtMapper = new Dictionary<string, string[]>();
 		public FileManagerHandler()
@@ -229,9 +234,9 @@ namespace FileManager
 		{
 			ResponseSuccessJson(new
 			{
-				rootPath = ROOT_DIR,
+				rootPath = UPLOAD_ROOT_DIR,
 				maxFileSizeAllow = MAX_FILE_SIZE_IN_BYTE,
-				thumbPath = ROOT_DIR + "/" + THUMB_DIR,
+				thumbPath = UPLOAD_ROOT_DIR + "/" + THUMB_DIR,
 			});
 		}
 
@@ -319,7 +324,32 @@ namespace FileManager
 				{
 					if (m.Value.Contains(fileExt))
 					{
-						files[i].ThumbPath = m.Key;
+						if (m.Key == DEFAULT_IMAGE_ICON)
+						{
+							var thumbDir = Path.Combine(RootPath, THUMB_DIR);
+							var thumbName = CreateMD5(Path.Combine(RootPath, files[i].Path)) + fileExt;
+							var thumbFullPath = Path.Combine(thumbDir, thumbName);
+							if (File.Exists(thumbFullPath))
+							{
+								files[i].ThumbPath = UPLOAD_ROOT_DIR + thumbFullPath.Replace(RootPath, "");
+							}
+							else
+							{
+								var thumbPath = CreateThumb(Path.Combine(RootPath, files[i].Path), thumbDir);
+								if (String.IsNullOrEmpty(thumbPath))
+								{
+									files[i].ThumbPath = DEFAULT_IMAGE_ICON;
+								}
+								else
+								{
+									files[i].ThumbPath = UPLOAD_ROOT_DIR + thumbPath.Replace(RootPath, "");
+								}
+							}
+						}
+						else
+						{
+							files[i].ThumbPath = m.Key;
+						}
 						break;
 					}
 				}
@@ -327,6 +357,70 @@ namespace FileManager
 				{
 					files[i].ThumbPath = DEFAULT_FILE_ICON;
 				}
+			}
+		}
+
+		/// <param name="imgPath"></param>
+		/// <param name="thumbDir"></param>
+		/// <returns>Đường dẫn của file thumbnail</returns>
+		string CreateThumb(string imgPath, string thumbDir)
+		{
+			try
+			{
+				var image = Image.FromFile(imgPath);
+				int thumbW = 0, thumbH = 0;
+				var thumbName = CreateMD5(imgPath);
+				var thumbExt = Path.GetExtension(imgPath);
+				if (image.Width > image.Height)
+				{
+					thumbW = THUMBNAIL_MAX_SIZE;
+					thumbH = image.Height * thumbW / image.Width;
+				}
+				else
+				{
+					thumbH = THUMBNAIL_MAX_SIZE;
+					thumbW = image.Width * thumbH / image.Height;
+				}
+
+				var destRect = new Rectangle(0, 0, thumbW, thumbH);
+				var destImage = new Bitmap(thumbW, thumbH);
+
+				using (var graphics = Graphics.FromImage(destImage))
+				{
+					graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
+				}
+				var path = Path.Combine(thumbDir, thumbName + thumbExt);
+				destImage.Save(path);
+				destImage.Dispose();
+
+				return path;
+			}
+			catch (Exception ex)
+			{
+				var filename = Server.MapPath("FILE_MANAGER_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
+				var content = DateTime.Now.ToString() + ": " + ex.Message
+								+ Environment.NewLine
+								+ Environment.NewLine
+								+ ex.StackTrace;
+				File.AppendAllText(filename, content);
+				return "";
+			}
+		}
+
+		string CreateMD5(string input)
+		{
+			// Use input string to calculate MD5 hash
+			using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+			{
+				byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+				byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+				StringBuilder sb = new System.Text.StringBuilder();
+				for (int i = 0; i < hashBytes.Length; i++)
+				{
+					sb.Append(hashBytes[i].ToString("x2"));
+				}
+				return sb.ToString();
 			}
 		}
 	}
