@@ -49,6 +49,10 @@
                         x-on:click="reloadPanel()">
                         <i class="fi fi-sync"></i>
                     </button>
+                    <button class="fbutton ml-1" type="button" :title="_fileSelectedIndex < 0 ? '' : 'Xóa mục đang chọn'" :disabled="_fileSelectedIndex < 0"
+                         x-on:click="deleteSeletecItem()">
+                        <i class="fi fi-trash"></i>
+                    </button>
                 </div>
             </div>
             <div class="filemanager__panel-container">

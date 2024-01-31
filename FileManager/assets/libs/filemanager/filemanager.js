@@ -170,12 +170,18 @@ document.addEventListener('alpine:init', () => {
 
 		// Sự kiện khi click vào 1 item trên panel
 		selectItemInPanel(fullPath, idx) {
-			this._fileSelectedIndex = idx;
-			this._fileSelected = this._filesAndFolders[idx].name;
+			// Bỏ chọn nếu chọn lại file đang chọn
+			if (this._fileSelectedIndex == idx) {
+				this._fileSelected = '';
+				this._fileSelectedIndex = -1;
+			} else {
+				this._fileSelectedIndex = idx;
+				this._fileSelected = this._filesAndFolders[idx].name;
+			}
 		},
 
 		// Sự kiện khi double-click vào 1 item trên panel
-		// TODO: Hiện tại chỉ có xử lsy mở folder, càn thêm xử lý tải file
+		// TODO: Hiện tại chỉ có xử lý mở folder, càn thêm xử lý tải file
 		openFolderOrSelectFile(itemOnPanel) {
 			if (itemOnPanel.isFolder) {
 				var idx = this._dirs.findIndex(d => d.fullPath == itemOnPanel.fullPath);
@@ -198,6 +204,27 @@ document.addEventListener('alpine:init', () => {
 				idx = this._dirSelectedIndex;
 			}
 			this.getDirsIn(dir, idx);
+		},
+		deleteSeletecItem() {
+			if (this._fileSelectedIndex < 0) return;
+			var selectedItem = this._filesAndFolders[this._fileSelectedIndex];
+			var mesg;
+			if (selectedItem.isFolder) {
+				mesg = `Thư mục con và các tập tin bên trong cũng sẽ bị xóa. Xác nhận xóa thư mục ${selectedItem.name}?`;
+			} else {
+				mesg = `Xác nhận xóa tập tin ${selectedItem.name}?`;
+			}
+			if (confirm(mesg)) {
+				this._cmdData.command = "del";
+				this._cmdData.value = selectedItem.fullPath;
+				$.get(this._url.executeCmd, this._cmdData)
+					.then((res) => {
+						if (selectedItem.isFolder) {
+							this._dirs = this._dirs.filter(d => d.fullPath.indexOf(selectedItem.fullPath) != 0);
+						}
+						this.reloadPanel();
+					});
+			}
 		},
 
 		// Sự kiện khi nhấn nút 'Upload' trên toolbox

@@ -40,7 +40,7 @@ namespace FileManager
 		private const string DEFAULT_WORD_ICON = "/assets/libs/filemanager/icon/file-word-solid.svg";
 
 		// Kích thước file upload tối đa, tính bằng BYTE
-		private const long MAX_FILE_SIZE_IN_BYTE = 5 * 1024 * 1024;  // 5MB
+		private const long MAX_FILE_SIZE_IN_BYTE = 5 * 1024 * 1024; // 5MB
 		// Kích thước ảnh preview, tính bằng px
 		private const int THUMBNAIL_MAX_SIZE = 80;
 
@@ -222,6 +222,11 @@ namespace FileManager
 						GetFilesAndFoldersInDir(value);
 						break;
 					}
+				case "del":
+					{
+						DelFileOrFolder(value);
+						break;
+					}
 				default:
 					{
 
@@ -241,23 +246,23 @@ namespace FileManager
 		}
 
 		/// <summary>
-		/// Xóa file theo đường dẫn chỉ định
+		/// Xóa file hoặc thư mục theo đường dẫn chỉ định
 		/// </summary>
-		/// <returns>true nếu xóa thành công</returns>
-		private bool Del(string path)
+		private void DelFileOrFolder(string path)
 		{
 			path = StandardizeDir(path);
 			var fullPath = Path.Combine(RootPath, path);
 
-			// Xóa file
-			if (File.Exists(fullPath))
+			if (Directory.Exists(fullPath))
 			{
-				File.Delete(fullPath);
-				return true;
+				// Xóa thư mục và thư mục con
+				Directory.Delete(fullPath, true);
 			}
-
-			// TODO: xóa thư mục
-			return false;
+			else if (File.Exists(fullPath))
+			{
+				// Xóa file
+				File.Delete(fullPath);
+			}
 		}
 
 		private void CreateFolder(string path)

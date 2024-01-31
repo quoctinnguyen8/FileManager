@@ -209,7 +209,10 @@
 	cursor: pointer;
 	min-width: 25px;
 }
-
+	.fbutton[disabled]{
+		opacity: 0.5;
+		cursor:not-allowed;
+	}
 	.fbutton.red {
 		color: white;
 		background-color: #f03939;
@@ -297,4 +300,7 @@
 }
 .fi-sync::after {
 	background-image: url('icon/sync-solid.svg');
+}
+.fi-trash::after {
+	background-image: url('icon/trash-alt-solid.svg');
 }
