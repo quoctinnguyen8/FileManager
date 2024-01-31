@@ -53,6 +53,10 @@
                          x-on:click="deleteSeletecItem()">
                         <i class="fi fi-trash"></i>
                     </button>
+                    <button class="fbutton ml-1" type="button" :title="_fileSelectedIndex < 0 ? '' : 'Tải về'" :disabled="_fileSelectedIndex < 0 || _filesAndFolders[_fileSelectedIndex].isFolder"
+                         x-on:click="downloadSeletecItem()">
+                        <i class="fi fi-download"></i>
+                    </button>
                 </div>
             </div>
             <div class="filemanager__panel-container">

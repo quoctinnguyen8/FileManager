@@ -64,6 +64,7 @@
   <ItemGroup>
     <Content Include="assets\libs\filemanager\icon\sync-solid.svg" />
     <Content Include="assets\libs\filemanager\icon\file-video-solid.svg" />
+    <Content Include="assets\libs\filemanager\icon\download-solid.svg" />
     <Content Include="assets\libs\tinymce\js\tinymce\icons\default\icons.min.js" />
     <Content Include="assets\libs\tinymce\js\tinymce\langs\vi.js" />
     <Content Include="assets\libs\tinymce\js\tinymce\license.txt" />

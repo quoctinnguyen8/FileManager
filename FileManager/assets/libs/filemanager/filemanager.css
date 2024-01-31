@@ -304,3 +304,6 @@
 .fi-trash::after {
 	background-image: url('icon/trash-alt-solid.svg');
 }
+.fi-download::after {
+	background-image: url('icon/download-solid.svg');
+}

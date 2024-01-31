@@ -205,6 +205,20 @@ document.addEventListener('alpine:init', () => {
 			}
 			this.getDirsIn(dir, idx);
 		},
+		downloadSeletecItem() {
+			if (this._fileSelectedIndex < 0) return;
+			var selectedItem = this._filesAndFolders[this._fileSelectedIndex];
+
+			if (selectedItem.isFolder) return;
+
+			var link = document.createElement("a");
+			link.download = selectedItem.name;
+			link.href = this._setting.rootPath + "/" + selectedItem.fullPath.replace(/\\/g, '/');
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			delete link;
+		},
 		deleteSeletecItem() {
 			if (this._fileSelectedIndex < 0) return;
 			var selectedItem = this._filesAndFolders[this._fileSelectedIndex];
