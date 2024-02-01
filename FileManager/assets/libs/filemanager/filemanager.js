@@ -256,7 +256,7 @@ document.addEventListener('alpine:init', () => {
 			this._uploadData.fileNames = [];
 			this._uploadData.base64Values = [];
 			var files = this.$refs['fileUpload_' + name].files;
-			if (!files) {
+			if (!files || files.length == 0) {
 				alert('Chưa chọn file');
 				return;
 			}
