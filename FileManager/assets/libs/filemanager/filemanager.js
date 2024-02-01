@@ -297,7 +297,7 @@ document.addEventListener('alpine:init', () => {
 					this.changeLabelUpload();
 					setTimeout(() => {
 						this._loader.show = false;
-					}, 300);
+					}, 500);
 				},
 				xhr: () => {
 					var xhr = new window.XMLHttpRequest();
