@@ -62,6 +62,7 @@
 	height: 500px;
 	background: white;
 	overflow: hidden;
+	position: relative;
 }
 
 	.filemanager__container > .filemanager__dir-tree {
@@ -218,6 +219,67 @@
 		background-color: #f03939;
 		border: 1px solid #e02727;
 	}
+.filemanager__loader{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top:0;
+	left: 0;
+	background-color: rgb(255, 255, 255, 0.5);
+	z-index: 100;
+	justify-content: center;
+	align-items: center;
+	display: none;
+}
+.filemanager__loader.show {
+	display: flex;
+}
+
+.spinner {
+	width: 75px;
+	height: 75px;
+	border: 5px solid cadetblue;
+	position: relative;
+	border-radius: 50%;
+	border-bottom-color: transparent;
+	animation: rotation 2s infinite;
+	animation-timing-function: linear;
+}
+	.spinner .filemanager__loader-box-mesg {
+		width: 70px;
+		height: 70px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		border-radius: 50%;
+		background-color: rgb(211, 248, 255, 0.20);
+		transform: translate(-50%, -50%);
+		text-align: center;
+		line-height: 70px;
+		animation: center 2s infinite;
+		text-shadow: 1px 1px 2px white;
+		font-size: larger;
+		animation-timing-function: linear;
+	}
+
+@keyframes rotation {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+@keyframes center {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) rotate(-360deg);
+	}
+}
 
 .empty-folder {
 	font-size: 20pt;

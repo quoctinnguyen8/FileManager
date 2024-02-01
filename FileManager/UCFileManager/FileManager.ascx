@@ -4,6 +4,14 @@
 <div x-data="filemanager('<%=Name %>','<%=AjaxPath %>', '<%=IsPopup ? "true" : "" %>')" class="filemanager__backdrop" :class="_popupProperty">
     <div x-show="_popupProperty.popup" x-on:click="_popupProperty.show = false" class="filemanager__close-popup">&times;</div>
     <div class="filemanager__container">
+        <%--Màn hình waiting khi thực hiện thao tác upload--%>
+        <div class="filemanager__loader" :class="{show: _loader.show}">
+            <div class="filemanager__loader-box">
+                <div class="spinner">
+                    <div x-text="_loader.message" class="filemanager__loader-box-mesg"></div>
+                </div>
+            </div>
+        </div>
         <%--Cây thư mục--%>
         <div class="filemanager__dir-tree">
             <div class="dir-item" x-on:click="getDirsIn(null, -1)">

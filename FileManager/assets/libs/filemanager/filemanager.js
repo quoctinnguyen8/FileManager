@@ -28,6 +28,10 @@ document.addEventListener('alpine:init', () => {
 			maxFileSizeAllow: 0,	// Kích thước file tối đa tính bằng byte
 			thumbPath: "/.tmb"
 		},
+		_loader: {
+			show: false,
+			message: '0.00%'
+		},
 
 		// Chức năng upload
 		_uploadData: {
@@ -278,6 +282,10 @@ document.addEventListener('alpine:init', () => {
 				async: true,
 				data: JSON.stringify(this._uploadData),
 				contentType: 'application/json',
+				beforeSend: () => {
+					this._loader.show = true;
+					this._loader.message = '0.00%';
+				},
 				success: (data) => {
 					this.reloadPanel();
 				},
@@ -287,6 +295,20 @@ document.addEventListener('alpine:init', () => {
 				complete: () => {
 					this.$refs['fileUpload_' + name].value = "";
 					this.changeLabelUpload();
+					setTimeout(() => {
+						this._loader.show = false;
+					}, 300);
+				},
+				xhr: () => {
+					var xhr = new window.XMLHttpRequest();
+					xhr.upload.addEventListener("progress", (evt) => {
+						if (evt.lengthComputable) {
+							var percentComplete = evt.loaded / evt.total * 100;
+							// Hiển thị phần trăm upload
+							this._loader.message = percentComplete.toFixed(2) + '%';
+						}
+					}, false);
+					return xhr;
 				}
 			});
 		},
