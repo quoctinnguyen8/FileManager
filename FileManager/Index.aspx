@@ -25,8 +25,13 @@
             <uc1:FileManager runat="server" ID="FileManager1" Name="FileManagerPopup" IsPopup="true" AjaxPath="/FileManagerHandler.asmx" />
 
             <h3>Chọn ảnh và nhận link (Double click để chọn ảnh)</h3>
+            <p>Về logic thư mục mặc định: Chỉ set thư mục mặc định ở lần mở đầu tiên, những lần sau giữ lại trạng thái trước đó của popup.
+                Nếu thư mục mặc định không tồn tại thì mở lại thư mục gốc
+            </p>
             <input id="txtOutputLink" type="text" size="50" />
             <button id="btnOpenFileManager" type="button">Mở popup</button>
+            <input id="txtDefaultFolder" type="text" size="20" placeholder="Thư mục mặc định khi mở" />
+
             <br />
             <h3>Tương tác với TinyMCE (Double click để chọn ảnh)</h3>
             <textarea id="tinyMCEEditor"></textarea>
@@ -42,8 +47,10 @@
     <script>
         // Mở popup khi nhấn vào button
         $("#btnOpenFileManager").click((ev) => {
+            // Lấy thư mục mặc định
+            var defaultFolder = $("#txtDefaultFolder").val();
             // Tạo đối tượng để làm việc với FileManager thông qua Name
-            var fm = new FileManager('FileManagerPopup');
+            var fm = new FileManager('FileManagerPopup', defaultFolder);
 
             fm.showFileManagerAsPopup();
             // Setup sự kiện khi chọn file

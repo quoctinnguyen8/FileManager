@@ -21,7 +21,7 @@
             <template x-for="(d, idx) in _dirs">
                 <div class="dir-item"
                     :class="{['dir-item-level-' + d.level]: true, selected: idx == _dirSelectedIndex}"
-                    x-on:click="getDirsIn(d, idx)">
+                    x-on:click="getDirsIn(d.fullPath, idx)">
                     <template x-if="idx == _dirSelectedIndex">
                         <img src="/assets/libs/filemanager/icon/folder-open-solid.svg" class="dir-icon" />
                     </template>

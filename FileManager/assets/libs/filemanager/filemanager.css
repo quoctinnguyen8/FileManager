@@ -40,6 +40,7 @@
 	font-weight: 400;
 	user-select: none;
 	transition: 0.3s all;
+	z-index: 100;
 }
 	.filemanager__close-popup:hover {
 		background-color: rgb(227, 58, 58, 0.50);

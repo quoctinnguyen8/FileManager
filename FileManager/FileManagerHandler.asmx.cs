@@ -24,7 +24,7 @@ namespace FileManager
 		// Thư mục upload file
 		private const string UPLOAD_ROOT_DIR = "/upload";
 		// Thư mục chứa ảnh xem trước
-		// TODO: dùng cho chức năng tạo thumbnail
+		// Dùng cho chức năng tạo thumbnail
 		private const string THUMB_DIR = ".tmb";
 		// Ảnh mặc định của thư mục
 		private const string DEFAULT_DIR_ICON = "/assets/libs/filemanager/icon/folder-solid.svg";
@@ -40,8 +40,8 @@ namespace FileManager
 		private const string DEFAULT_WORD_ICON = "/assets/libs/filemanager/icon/file-word-solid.svg";
 
 		// Kích thước file upload tối đa, tính bằng BYTE
-		private const long MAX_FILE_SIZE_IN_BYTE = 5 * 1024 * 1024; // 5MB
-		// Kích thước ảnh preview, tính bằng px
+		private const long MAX_FILE_SIZE_IN_BYTE = 100 * 1024 * 1024; // 5MB
+																	  // Kích thước ảnh preview, tính bằng px
 		private const int THUMBNAIL_MAX_SIZE = 80;
 
 		private const string ERR_DIR_NOT_FOUND = "Không tìm thấy thư mục.";
@@ -50,7 +50,13 @@ namespace FileManager
 		private const string ERR_BAD_REUQEST = "Dữ liệu không hợp lệ.";
 		private const string ERR_INTERNAL_SERVER = "Đã xảy ra lỗi trong quá trình xử lý yêu cầu (500). ";
 
-		private string RootPath { get { return Server.MapPath(UPLOAD_ROOT_DIR); } }
+		private string RootPath
+		{
+			get
+			{
+				return Server.MapPath(UPLOAD_ROOT_DIR.TrimStart("\\/".ToCharArray()));
+			}
+		}
 
 		private readonly Dictionary<string, string[]> _fileExtMapper = new Dictionary<string, string[]>();
 		public FileManagerHandler()
@@ -157,6 +163,44 @@ namespace FileManager
 				ResponseErrorJson(HttpStatusCode.InternalServerError, ERR_INTERNAL_SERVER + ex.Message);
 			}
 		}
+		private void GetDefaultDirectories(string subDir)
+		{
+			try
+			{
+				// Chuẩn hóa param
+				subDir = subDir.Replace("/", "\\");
+				subDir = StandardizeDir(subDir);
+				var fullPath = Path.Combine(RootPath, subDir);
+				if (!Directory.Exists(fullPath))
+				{
+					ResponseErrorJson(HttpStatusCode.BadRequest, ERR_DIR_NOT_FOUND);
+					return;
+				}
+
+				// Cộng dồn thư mục, tính từ thư mục gốc cho đến thư mục mặc định
+				var folderSegments = subDir.Split('\\');
+				List<string> paths = new List<string>();
+				fullPath = RootPath;
+
+				int i = 0;
+				do
+				{
+					var dirs = Directory.GetDirectories(fullPath)
+									.Select(d => d.Replace(RootPath + "\\", ""));
+					paths.AddRange(dirs);
+					if (i < folderSegments.Length)
+					{
+						fullPath = Path.Combine(fullPath, folderSegments[i]);
+					}
+					i++;
+				} while (i <= folderSegments.Length);
+				ResponseSuccessJson(paths);
+			}
+			catch (Exception ex)
+			{
+				ResponseErrorJson(HttpStatusCode.InternalServerError, ERR_INTERNAL_SERVER + ex.Message);
+			}
+		}
 
 		private void GetFilesAndFoldersInDir(string subDir = "")
 		{
@@ -178,7 +222,6 @@ namespace FileManager
 								Path = d.Replace(RootPath + "\\", "")
 							}).ToList();
 				CreateThumbForFiles(files);
-				// TODO: Tạo file thumbnail nếu không tồn tại
 
 				var folders = Directory.GetDirectories(fullPath)
 							.Select(d => new FileAndFolderModel
@@ -210,6 +253,11 @@ namespace FileManager
 				case "create_folder":
 					{
 						CreateFolder(value);
+						break;
+					}
+				case "select_default":
+					{
+						GetDefaultDirectories(value);
 						break;
 					}
 				case "select_dir":
@@ -288,7 +336,7 @@ namespace FileManager
 					  .Replace("?", "")
 					  .Replace("@", "")
 					  .Replace("..", "")       // Xóa 2 dấu chấm liên tiếp vì lý do bảo mật
-					  .TrimStart(new char[] { '/', '\\' });
+					  .Trim(new char[] { '/', '\\', ' ' });
 		}
 
 		private void ResponseSuccessJson(object obj, string message = "")

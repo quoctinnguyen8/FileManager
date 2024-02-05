@@ -21,12 +21,14 @@ document.addEventListener('alpine:init', () => {
 		},
 		_popupProperty: {
 			popup: !!isPopup,
-			show: false
+			show: false,
+			showCount: 0,
 		},
 		_setting: {
 			rootPath: "/upload",	// Dùng để thêm vào trước đường dẫn file
 			maxFileSizeAllow: 0,	// Kích thước file tối đa tính bằng byte
-			thumbPath: "/.tmb"
+			thumbPath: "/.tmb",
+			defaultFolder: '',
 		},
 		_loader: {
 			show: false,
@@ -78,7 +80,7 @@ document.addEventListener('alpine:init', () => {
 			// Hiển thị thư mục ngay nếu không phải là popup
 			// Nếu là popup thì chờ kích hoạt event mới hiện
 			if (!this._popupProperty.popup) {
-				this.reloadPanel();
+				this.reloadPanel();	
 			}
 		},
 		getSetting() {
@@ -92,11 +94,11 @@ document.addEventListener('alpine:init', () => {
 				});
 		},
 
-		getDirsIn(dirObj, idx) {
+		getDirsIn(fullDirPath, idx) {
 			this._cmdData.command = "select_dir";
-			this._cmdData.value = dirObj ? dirObj.fullPath : '';
+			this._cmdData.value = fullDirPath;
 			this._dirSelectedIndex = idx;
-			this._dirSelectedPath = dirObj ? dirObj.fullPath : '';
+			this._dirSelectedPath = fullDirPath;
 			this._fileSelected = '';
 
 			$.ajax({
@@ -125,7 +127,7 @@ document.addEventListener('alpine:init', () => {
 				}
 			});
 			setTimeout(() => {
-				this.getFilesAndFoldersIn(dirObj ? dirObj.fullPath : '');
+				this.getFilesAndFoldersIn(fullDirPath);
 			}, 100);
 		},
 
@@ -185,11 +187,10 @@ document.addEventListener('alpine:init', () => {
 		},
 
 		// Sự kiện khi double-click vào 1 item trên panel
-		// TODO: Hiện tại chỉ có xử lý mở folder, càn thêm xử lý tải file
 		openFolderOrSelectFile(itemOnPanel) {
 			if (itemOnPanel.isFolder) {
 				var idx = this._dirs.findIndex(d => d.fullPath == itemOnPanel.fullPath);
-				this.getDirsIn(this._dirs[idx], idx);
+				this.getDirsIn(itemOnPanel.fullPath, idx);
 				return;
 			}
 
@@ -202,12 +203,13 @@ document.addEventListener('alpine:init', () => {
 		},
 		reloadPanel() {
 			var idx = -1;
-			var dir = null;
+			var fullPath = '';
 			if (this._dirSelectedIndex >= 0) {
-				dir = this._dirs[this._dirSelectedIndex];
 				idx = this._dirSelectedIndex;
+				var dir = this._dirs[this._dirSelectedIndex];
+				fullPath = dir.fullPath;
 			}
-			this.getDirsIn(dir, idx);
+			this.getDirsIn(fullPath, idx);
 		},
 		downloadSeletecItem() {
 			if (this._fileSelectedIndex < 0) return;
@@ -261,6 +263,7 @@ document.addEventListener('alpine:init', () => {
 				return;
 			}
 
+			// Kiểm tra dung lượng file
 			for (var i = 0; i < files.length; i++) {
 				if (files[i].size == 0) {
 					alert(`Tệp ${files[i].name} không hợp lệ.`);
@@ -300,11 +303,11 @@ document.addEventListener('alpine:init', () => {
 					}, 500);
 				},
 				xhr: () => {
+					// Hiển thị phần trăm upload
 					var xhr = new window.XMLHttpRequest();
 					xhr.upload.addEventListener("progress", (evt) => {
 						if (evt.lengthComputable) {
 							var percentComplete = evt.loaded / evt.total * 100;
-							// Hiển thị phần trăm upload
 							this._loader.message = percentComplete.toFixed(2) + '%';
 						}
 					}, false);
@@ -360,8 +363,57 @@ document.addEventListener('alpine:init', () => {
 			}
 		},
 		showFileManagerAsPopup() {
-			this.reloadPanel();
+			if (!this._setting.defaultFolder || this._popupProperty.showCount > 0) {
+				this.reloadPanel();
+			}
 			this._popupProperty.show = true;
+			this._popupProperty.showCount++;
+		},
+		setDefaultFolder(defaultFolder) {
+			// Xóa ký tự \,/, space ở đầu và cuối
+			defaultFolder = defaultFolder.replace(/^(\s|\\|\/)+|(\\|\/|\s)+$/gm, '');
+			if (this._popupProperty.showCount > 0) {
+				return;
+			}
+			this._cmdData.command = "select_default";
+			this._cmdData.value = defaultFolder;
+			this._fileSelected = '';
+			this._dirSelectedIndex = -1;
+			this._setting.defaultFolder = defaultFolder;
+
+			$.ajax({
+				type: "GET",
+				url: this._url.executeCmd,
+				data: this._cmdData,
+				success: (res) => {
+					if (res.Data && res.Data.length) {
+						var tmpDirs = [];
+						for (var i = 0; i < res.Data.length; i++) {
+							const obj = res.Data[i];
+							const segments = obj.split("\\");
+							var level = segments.length;
+							var name = segments.pop();
+
+							if (obj == ".tmb") continue;
+
+							tmpDirs.push({
+								level: level,
+								name: name,
+								fullPath: obj
+							});
+						}
+						var tmpDirsSorted = tmpDirs.sort((a,b) => a.fullPath.localeCompare(b.fullPath));
+						this._dirs = tmpDirsSorted;
+						this._dirSelectedPath = defaultFolder.replace(/\//g, '\\');
+						this._dirSelectedIndex = tmpDirsSorted.findIndex(d => d.fullPath == this._dirSelectedPath);
+						this.getFilesAndFoldersIn(this._dirSelectedPath);
+					}
+				},
+				error: () => {
+					// Trường hợp lỗi thì quay về thư mục gốc
+					this.reloadPanel();
+				}
+			});
 		},
 		addCustomEvent() {
 			// sự kiện show file-manager
@@ -381,16 +433,33 @@ document.addEventListener('alpine:init', () => {
 			document.addEventListener(eventName, (e) => {
 				this._popupProperty.show = false;
 			});
+
+			// sự kiện để set giá trị mặc định khi mở popup
+			eventName = `filemanager.${name}.setDefaultFolder`;
+			document.addEventListener(eventName, (e) => {
+				var folder = e.detail.folder;
+				this.setDefaultFolder(folder);
+			});
 		}
 	}));
 });
 
-var FileManager = function (name) {
+var FileManager = function (name, defaultFolder, style) {
+
+	if (defaultFolder) {
+		var eventName = `filemanager.${name}.setDefaultFolder`;
+		var event = new CustomEvent(eventName, {
+			detail: {
+				folder: defaultFolder
+			}
+		});
+		document.dispatchEvent(event);
+	}
+
 	this.showFileManagerAsPopup = function () {
 		var eventName = `filemanager.${name}.showAsPopup`;
 		var event = new CustomEvent(eventName);
 		document.dispatchEvent(event);
-
 	}
 
 	this.closePopup = function () {
