@@ -25,7 +25,7 @@
             <uc1:FileManager runat="server" ID="FileManager1" Name="FileManagerPopup" IsPopup="true" AjaxPath="/FileManagerHandler.asmx" />
 
             <h3>Chọn ảnh và nhận link (Double click để chọn ảnh)</h3>
-            <p>Về logic thư mục mặc định: Chỉ set thư mục mặc định ở lần mở đầu tiên, những lần sau giữ lại trạng thái trước đó của popup.
+            <p>Về logic thư mục mặc định: Chỉ set thư mục mặc định ở lần mở đầu tiên tính từ lúc tải trang, những lần sau giữ lại trạng thái trước đó của popup.
                 Nếu thư mục mặc định không tồn tại thì mở lại thư mục gốc
             </p>
             <input id="txtOutputLink" type="text" size="50" />
