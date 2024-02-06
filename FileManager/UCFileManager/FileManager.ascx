@@ -12,6 +12,16 @@
                 </div>
             </div>
         </div>
+        <div class="filemanager__modal" :class="{show: _modal.show}">
+            <div class="filemanager__modal-box">
+                <label x-text="_modal.label"></label>
+                <input type="text" class="finput-text" x-model="_modal.inputValue" />
+                <div>
+                    <button class="fbutton" type="button" x-on:click="execPrimaryModalButtonAction()" x-text="_modal.buttonText"></button>
+                    <button class="fbutton red ml-1" type="button" x-on:click="_modal.show = false" title="Đóng">&times;</button>
+                </div>
+            </div>
+        </div>
         <%--Cây thư mục--%>
         <div class="filemanager__dir-tree">
             <div class="dir-item" x-on:click="getDirsIn(null, -1)">
@@ -42,13 +52,7 @@
                     <button x-on:click="uploadFile()" title="Tải tệp lên" class="fbutton" type="button"><i class="fi fi-file-upload"></i></button>
                 </div>
                 <div class="panel-toolbox__new-folder ml-1">
-                    <div class="d-flex" x-show="_toolbox.isShowNewFolder">
-                        <input type="text" class="finput-text" x-ref="newFolderName_<%=Name %>" placeholder="Tên thư mục mới" />
-                        <button class="fbutton ml-1" type="button" x-on:click="createNewFolder()">Tạo</button>
-                        <button class="fbutton red ml-1" type="button" x-on:click="_toolbox.isShowNewFolder = false" title="Đóng">&times;</button>
-                    </div>
-                    <button class="fbutton ml-1" type="button" title="Tạo thư mục mới"
-                        x-on:click="_toolbox.isShowNewFolder = true" x-show="_toolbox.isShowNewFolder == false">
+                    <button class="fbutton ml-1" type="button" title="Tạo thư mục mới" x-on:click="openModal('CREATE_FOLDER')">
                         <i class="fi fi-folder-plus"></i>
                     </button>
                 </div>

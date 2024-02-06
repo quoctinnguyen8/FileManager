@@ -16,9 +16,6 @@ document.addEventListener('alpine:init', () => {
 			command: '',
 			value: '',
 		},
-		_toolbox: {
-			isShowNewFolder: false,
-		},
 		_popupProperty: {
 			popup: !!isPopup,
 			show: false,
@@ -33,6 +30,13 @@ document.addEventListener('alpine:init', () => {
 		_loader: {
 			show: false,
 			message: '0.00%'
+		},
+		_modal: {
+			mode: '',
+			show: false,
+			label: 'Nhập gì đi',
+			buttonText: 'Save',
+			inputValue: ''
 		},
 
 		// Chức năng upload
@@ -315,9 +319,7 @@ document.addEventListener('alpine:init', () => {
 				}
 			});
 		},
-		createNewFolder() {
-			var folderName = this.$refs['newFolderName_' + name].value;
-
+		createNewFolder(folderName) {
 			if (!folderName) {
 				alert("Chưa nhập tên thư mục!");
 				return;
@@ -331,12 +333,10 @@ document.addEventListener('alpine:init', () => {
 				url: this._url.executeCmd,
 				data: this._cmdData,
 				success: (res) => {
-					this.$refs['newFolderName_' + name].value = '';
 					this.reloadPanel();
 				},
 				error: (err) => {
 					alert(err.responseJSON.Message);
-					this.$refs['newFolderName_' + name].focus();
 				}
 			});
 		},
@@ -415,6 +415,44 @@ document.addEventListener('alpine:init', () => {
 				}
 			});
 		},
+
+		openModal(mode) {
+			this._modal.show = true;
+			this._modal.mode = mode;
+			switch (mode) {
+				case 'CREATE_FOLDER': {
+					this._modal.label = "Nhập tên thư mục";
+					this._modal.buttonText = "Tạo thư mục";
+					this._modal.inputValue = '';
+					break;
+				}
+				case 'RENAME_ITEM': {
+					this._modal.label = "Đặt lại tên";
+					this._modal.buttonText = "Thực hiện";
+					this._modal.inputValue = this._fileSelected;
+					break;
+				}
+				default:
+			}
+		},
+		execPrimaryModalButtonAction() {
+			switch (this._modal.mode) {
+				case 'CREATE_FOLDER': {
+					this.createNewFolder(this._modal.inputValue);
+					break;
+				}
+				case 'RENAME_ITEM': {
+					
+					break;
+				}
+				default:
+			}
+			// Chờ 200ms rồi mới ẩn modal
+			setTimeout(() => {
+				this._modal.show = false;
+			}, 200);
+		},
+
 		addCustomEvent() {
 			// sự kiện show file-manager
 			var eventName = `filemanager.${name}.showAsPopup`;
