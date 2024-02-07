@@ -64,7 +64,7 @@
                     </button>
                     <button class="fbutton ml-1" type="button" title="Đổi tên"
                         x-on:click="openModal('RENAME_ITEM')" :disabled="_fileSelectedIndex < 0">
-                        Đổi tên
+                        <i class="fi fi-rename"></i>
                     </button>
                     <button class="fbutton ml-1" type="button" :title="_fileSelectedIndex < 0 ? '' : 'Tải về'" :disabled="_fileSelectedIndex < 0 || _filesAndFolders[_fileSelectedIndex].isFolder"
                          x-on:click="downloadSeletecItem()">
