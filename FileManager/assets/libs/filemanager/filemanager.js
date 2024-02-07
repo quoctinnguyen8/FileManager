@@ -1,9 +1,7 @@
-String.prototype.isImage = function () {
-	var segments = this.split('.');
-	if (segments.length <= 1) return false;
-	var ext = segments.pop().toLowerCase();
-	return ['png', 'jpeg', 'jpg', 'gif', 'webp'].indexOf(ext) >= 0;
+String.prototype.trimForPath = function () {
+	return this.replace(/^(\s|\\|\/)+|(\\|\/|\s)+$/gm, '');
 }
+
 
 
 document.addEventListener('alpine:init', () => {
@@ -14,7 +12,8 @@ document.addEventListener('alpine:init', () => {
 		},
 		_cmdData: {
 			command: '',
-			value: '',
+			value1: '',
+			value2: '',
 		},
 		_popupProperty: {
 			popup: !!isPopup,
@@ -84,12 +83,12 @@ document.addEventListener('alpine:init', () => {
 			// Hiển thị thư mục ngay nếu không phải là popup
 			// Nếu là popup thì chờ kích hoạt event mới hiện
 			if (!this._popupProperty.popup) {
-				this.reloadPanel();	
+				this.reloadPanel();
 			}
 		},
 		getSetting() {
 			this._cmdData.command = "get_setting";
-			this._cmdData.value = '';
+			this._cmdData.value1 = '';
 			$.get(this._url.executeCmd, this._cmdData)
 				.then((res) => {
 					this._setting.rootPath = res.Data.rootPath;
@@ -100,7 +99,7 @@ document.addEventListener('alpine:init', () => {
 
 		getDirsIn(fullDirPath, idx) {
 			this._cmdData.command = "select_dir";
-			this._cmdData.value = fullDirPath;
+			this._cmdData.value1 = fullDirPath;
 			this._dirSelectedIndex = idx;
 			this._dirSelectedPath = fullDirPath;
 			this._fileSelected = '';
@@ -132,7 +131,7 @@ document.addEventListener('alpine:init', () => {
 			});
 			setTimeout(() => {
 				this.getFilesAndFoldersIn(fullDirPath);
-			}, 100);
+			}, 150);
 		},
 
 		addDirsToTree(dirs, idx) {
@@ -148,7 +147,7 @@ document.addEventListener('alpine:init', () => {
 		// Nhận item và hiển thị ở panel
 		getFilesAndFoldersIn(dirName) {
 			this._cmdData.command = "select_all";
-			this._cmdData.value = dirName;
+			this._cmdData.value1 = dirName;
 			this._fileSelectedIndex = -1;
 
 			$.ajax({
@@ -240,10 +239,11 @@ document.addEventListener('alpine:init', () => {
 			}
 			if (confirm(mesg)) {
 				this._cmdData.command = "del";
-				this._cmdData.value = selectedItem.fullPath;
+				this._cmdData.value1 = selectedItem.fullPath;
 				$.get(this._url.executeCmd, this._cmdData)
 					.then((res) => {
 						if (selectedItem.isFolder) {
+							// Xóa thư mục được chọn khỏi cây thư mục
 							this._dirs = this._dirs.filter(d => d.fullPath.indexOf(selectedItem.fullPath) != 0);
 						}
 						this.reloadPanel();
@@ -320,12 +320,13 @@ document.addEventListener('alpine:init', () => {
 			});
 		},
 		createNewFolder(folderName) {
+			folderName = folderName.trimForPath();
 			if (!folderName) {
 				alert("Chưa nhập tên thư mục!");
 				return;
 			}
 			this._cmdData.command = "create_folder";
-			this._cmdData.value = this._dirSelectedPath + "\\" + folderName;
+			this._cmdData.value1 = this._dirSelectedPath + "\\" + folderName;
 			this._fileSelectedIndex = -1;
 
 			$.ajax({
@@ -339,6 +340,44 @@ document.addEventListener('alpine:init', () => {
 					alert(err.responseJSON.Message);
 				}
 			});
+		},
+		renameSelectedItem(newName) {
+			newName = newName.trimForPath();
+			if (this._fileSelectedIndex < 0) return;
+			var selectedItem = this._filesAndFolders[this._fileSelectedIndex];
+			if (!selectedItem) return;
+			// Nếu không thay đổi thì thôi
+			if (selectedItem.name == newName) return;
+
+			this._cmdData.command = "rename";
+			this._cmdData.value1 = selectedItem.fullPath;
+			this._cmdData.value2 = newName;
+
+			$.get(this._url.executeCmd, this._cmdData)
+				.then((res) => {
+					if (selectedItem.isFolder) {
+						// Đổi tên thư mục được chọn ở cây thư mục
+						// Cũng thay đổi path của nó và thư mục con
+						var selectedDirIdx = this._dirs.findIndex(d => d.fullPath == selectedItem.fullPath);
+						var firstIdx = selectedDirIdx;
+						do {
+							var newFullPath = "";
+							var partOfOldPath = this._dirs[selectedDirIdx].fullPath.slice(0, selectedItem.fullPath.length);
+							var segments = partOfOldPath.split("\\");
+							segments[segments.length - 1] = newName;
+							var partOfNewPath = segments.join("\\");
+							this._dirs[selectedDirIdx].fullPath = partOfNewPath + this._dirs[selectedDirIdx].fullPath.substr(selectedItem.fullPath.length);
+							if (firstIdx == selectedDirIdx) {
+								this._dirs[selectedDirIdx].name = newName;
+							}
+							selectedDirIdx++;
+						} while (selectedDirIdx < this._dirs.length && this._dirs[selectedDirIdx].fullPath.indexOf(selectedItem.fullPath) == 0);
+					}
+					this.reloadPanel();
+				})
+				.catch((err) => {
+					alert(err.responseJSON.Message);
+				});
 		},
 
 		// Sự kiện khi chọn file để upload
@@ -371,12 +410,12 @@ document.addEventListener('alpine:init', () => {
 		},
 		setDefaultFolder(defaultFolder) {
 			// Xóa ký tự \,/, space ở đầu và cuối
-			defaultFolder = defaultFolder.replace(/^(\s|\\|\/)+|(\\|\/|\s)+$/gm, '');
+			defaultFolder = defaultFolder.trimForPath();
 			if (this._popupProperty.showCount > 0) {
 				return;
 			}
 			this._cmdData.command = "select_default";
-			this._cmdData.value = defaultFolder;
+			this._cmdData.value1 = defaultFolder;
 			this._fileSelected = '';
 			this._dirSelectedIndex = -1;
 			this._setting.defaultFolder = defaultFolder;
@@ -402,7 +441,7 @@ document.addEventListener('alpine:init', () => {
 								fullPath: obj
 							});
 						}
-						var tmpDirsSorted = tmpDirs.sort((a,b) => a.fullPath.localeCompare(b.fullPath));
+						var tmpDirsSorted = tmpDirs.sort((a, b) => a.fullPath.localeCompare(b.fullPath));
 						this._dirs = tmpDirsSorted;
 						this._dirSelectedPath = defaultFolder.replace(/\//g, '\\');
 						this._dirSelectedIndex = tmpDirsSorted.findIndex(d => d.fullPath == this._dirSelectedPath);
@@ -434,6 +473,16 @@ document.addEventListener('alpine:init', () => {
 				}
 				default:
 			}
+			setTimeout(() => {
+				// Focus vào ô input, chừa lại phần extension
+				this.$refs['modalInput_' + name].focus();
+				var nameLength = this._modal.inputValue.lastIndexOf(".");
+				if (nameLength > 0) {
+					this.$refs['modalInput_' + name].setSelectionRange(0, nameLength);
+				} else {
+					this.$refs['modalInput_' + name].select();
+				}
+			}, 50);
 		},
 		execPrimaryModalButtonAction() {
 			switch (this._modal.mode) {
@@ -442,7 +491,7 @@ document.addEventListener('alpine:init', () => {
 					break;
 				}
 				case 'RENAME_ITEM': {
-					
+					this.renameSelectedItem(this._modal.inputValue);
 					break;
 				}
 				default:

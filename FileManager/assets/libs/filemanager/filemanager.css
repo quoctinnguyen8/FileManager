@@ -385,3 +385,6 @@
 .fi-download::after {
 	background-image: url('icon/download-solid.svg');
 }
+.fi-rename::after {
+	background-image: url('icon/pen-to-square-solid.svg');
+}

@@ -40,10 +40,13 @@ namespace FileManager
 		private const string DEFAULT_WORD_ICON = "/assets/libs/filemanager/icon/file-word-solid.svg";
 
 		// Kích thước file upload tối đa, tính bằng BYTE
-		private const long MAX_FILE_SIZE_IN_BYTE = 100 * 1024 * 1024; // 5MB
-																	  // Kích thước ảnh preview, tính bằng px
+		// 10MB
+		private const long MAX_FILE_SIZE_IN_BYTE = 10 * 1024 * 1024;
+		// Kích thước ảnh preview, tính bằng px
 		private const int THUMBNAIL_MAX_SIZE = 80;
 
+		private const string ERR_DIR_OR_FILE_NOT_FOUND = "Không tìm thấy tệp hoặc thư mục.";
+		private const string ERR_DIR_OR_FILE_EXISTS = "Tệp hoặc thư mục đã tồn tại.";
 		private const string ERR_DIR_NOT_FOUND = "Không tìm thấy thư mục.";
 		private const string ERR_DIR_EXISTS = "Thư mục đã tồn tại.";
 		private const string ERR_FILE_NOT_FOUND = "Không tìm thấy tệp.";
@@ -241,7 +244,7 @@ namespace FileManager
 
 		[WebMethod]
 		[ScriptMethod]
-		public void ExecuteCommand(string command, string value)
+		public void ExecuteCommand(string command, string value1, string value2)
 		{
 			switch (command)
 			{
@@ -250,29 +253,34 @@ namespace FileManager
 						GetSetting();
 						break;
 					}
+				case "rename":
+					{
+						Rename(value1, value2);
+						break;
+					}
 				case "create_folder":
 					{
-						CreateFolder(value);
+						CreateFolder(value1);
 						break;
 					}
 				case "select_default":
 					{
-						GetDefaultDirectories(value);
+						GetDefaultDirectories(value1);
 						break;
 					}
 				case "select_dir":
 					{
-						GetDirectories(value);
+						GetDirectories(value1);
 						break;
 					}
 				case "select_all":
 					{
-						GetFilesAndFoldersInDir(value);
+						GetFilesAndFoldersInDir(value1);
 						break;
 					}
 				case "del":
 					{
-						DelFileOrFolder(value);
+						DelFileOrFolder(value1);
 						break;
 					}
 				default:
@@ -324,6 +332,47 @@ namespace FileManager
 			}
 			Directory.CreateDirectory(fullPath);
 			ResponseSuccessJson(null);
+		}
+
+		void Rename(string oldPath, string newName)
+		{
+			oldPath = StandardizeDir(oldPath);
+			newName = StandardizeDir(newName);
+			oldPath = Path.Combine(RootPath, oldPath);
+			// Lỗi nếu không tồn tại thư mục/file
+			if (!(Directory.Exists(oldPath) || File.Exists(oldPath)))
+			{
+				ResponseErrorJson(HttpStatusCode.BadRequest, ERR_DIR_OR_FILE_NOT_FOUND);
+				return;
+			}
+			var newPath = Directory.GetParent(oldPath).FullName;
+			newPath = Path.Combine(newPath, newName);
+			// Lỗi nếu tên sau khi rename đã tồn tại
+			if (Directory.Exists(newPath) || File.Exists(newPath))
+			{
+				ResponseErrorJson(HttpStatusCode.BadRequest, ERR_DIR_OR_FILE_EXISTS);
+				return;
+			}
+			try
+			{
+				// Kiểm tra xem path cũ là thư mục hay file
+				// Dựa vào đó để dùng hàm đổi tên phù hợp
+				FileAttributes attr = File.GetAttributes(oldPath);
+				if (attr.HasFlag(FileAttributes.Directory))
+				{
+					Directory.Move(oldPath, newPath);
+					ResponseSuccessJson(null, "Đổi tên thư mục thành công");
+				}
+				else
+				{
+					File.Move(oldPath, newPath);
+					ResponseSuccessJson(null, "Đổi tên tệp thành công");
+				}
+			}
+			catch (Exception ex)
+			{
+				ResponseErrorJson(HttpStatusCode.BadRequest, ERR_BAD_REUQEST + " " + ex.Message);
+			}
 		}
 
 		/// <summary>
@@ -445,7 +494,7 @@ namespace FileManager
 				var path = Path.Combine(thumbDir, thumbName + thumbExt);
 				destImage.Save(path);
 				destImage.Dispose();
-
+				image.Dispose();
 				return path;
 			}
 			catch (Exception ex)
