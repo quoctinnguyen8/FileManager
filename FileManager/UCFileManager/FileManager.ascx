@@ -12,10 +12,11 @@
                 </div>
             </div>
         </div>
+		<%--Modal cho chức năng tạo thư mục và rename--%>
         <div class="filemanager__modal" :class="{show: _modal.show}">
             <div class="filemanager__modal-box">
                 <label x-text="_modal.label"></label>
-                <input type="text" class="finput-text" x-model="_modal.inputValue" />
+                <input type="text" class="finput-text" x-model="_modal.inputValue" x-ref="modalInput_<%=Name %>" />
                 <div>
                     <button class="fbutton" type="button" x-on:click="execPrimaryModalButtonAction()" x-text="_modal.buttonText"></button>
                     <button class="fbutton red ml-1" type="button" x-on:click="_modal.show = false" title="Đóng">&times;</button>
@@ -61,13 +62,17 @@
                         x-on:click="reloadPanel()">
                         <i class="fi fi-sync"></i>
                     </button>
-                    <button class="fbutton ml-1" type="button" :title="_fileSelectedIndex < 0 ? '' : 'Xóa mục đang chọn'" :disabled="_fileSelectedIndex < 0"
-                         x-on:click="deleteSeletecItem()">
-                        <i class="fi fi-trash"></i>
+                    <button class="fbutton ml-1" type="button" title="Đổi tên"
+                        x-on:click="openModal('RENAME_ITEM')" :disabled="_fileSelectedIndex < 0">
+                        Đổi tên
                     </button>
                     <button class="fbutton ml-1" type="button" :title="_fileSelectedIndex < 0 ? '' : 'Tải về'" :disabled="_fileSelectedIndex < 0 || _filesAndFolders[_fileSelectedIndex].isFolder"
                          x-on:click="downloadSeletecItem()">
                         <i class="fi fi-download"></i>
+                    </button>
+                    <button class="fbutton ml-1" type="button" :title="_fileSelectedIndex < 0 ? '' : 'Xóa mục đang chọn'" :disabled="_fileSelectedIndex < 0"
+                         x-on:click="deleteSeletecItem()">
+                        <i class="fi fi-trash"></i>
                     </button>
                 </div>
             </div>
